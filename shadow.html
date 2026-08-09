@@ -198,6 +198,92 @@ textarea:focus,input:focus{border-color:rgba(213,168,90,.55)}
 @media(max-width:1050px){
   .shadow-lighthouse{right:5%;width:138px;height:220px;opacity:.9}
 }
+
+.today-shell{
+  display:none;
+  max-width:1480px;
+  margin:0 auto;
+  padding:0 24px 50px;
+}
+.today-shell.active{display:block}
+.today-head{
+  display:flex;
+  justify-content:space-between;
+  align-items:end;
+  gap:16px;
+  flex-wrap:wrap;
+  margin:10px 0 16px;
+}
+.today-head h2{font-size:clamp(2.8rem,5vw,4.8rem)}
+.today-head p{color:var(--muted);max-width:720px;line-height:1.6;margin:7px 0 0}
+.today-list{display:grid;gap:12px}
+.today-item{
+  border:1px solid var(--line);
+  background:linear-gradient(180deg,#0d1824,#09131d);
+  border-radius:10px;
+  padding:16px;
+  position:relative;
+}
+.today-item.high{border-color:rgba(239,118,106,.55)}
+.today-item.medium{border-color:rgba(242,166,90,.45)}
+.today-item::before{
+  content:"";
+  position:absolute;
+  left:0;
+  top:12px;
+  bottom:12px;
+  width:4px;
+  border-radius:4px;
+  background:#586271;
+}
+.today-item.high::before{background:var(--urgent)}
+.today-item.medium::before{background:var(--medium)}
+.today-top{
+  display:flex;
+  justify-content:space-between;
+  gap:14px;
+  align-items:flex-start;
+}
+.today-title{
+  font-family:Georgia,serif;
+  font-size:1.34rem;
+  font-weight:700;
+}
+.today-item.high .today-title{color:var(--urgent)}
+.today-item.medium .today-title{color:var(--medium)}
+.today-meta{
+  display:flex;
+  gap:7px;
+  flex-wrap:wrap;
+  margin:9px 0 0;
+}
+.today-pill{
+  border:1px solid var(--line);
+  border-radius:999px;
+  padding:5px 8px;
+  color:#b9b3aa;
+  font-size:.74rem;
+}
+.today-deadline{
+  flex:0 0 auto;
+  border:1px solid var(--line);
+  border-radius:999px;
+  padding:6px 9px;
+  font-size:.74rem;
+  text-transform:uppercase;
+  letter-spacing:.08em;
+}
+.today-item.high .today-deadline{color:var(--urgent)}
+.today-item.medium .today-deadline{color:var(--medium)}
+.today-detail{color:#ccc5ba;line-height:1.55;margin-top:10px}
+.today-empty{
+  border:1px solid var(--line);
+  background:#0a151f;
+  border-radius:10px;
+  padding:18px;
+  color:var(--muted);
+}
+
 @media(max-width:980px){
   .questions{grid-template-columns:1fr}
   .field-grid{grid-template-columns:1fr}
@@ -217,6 +303,7 @@ textarea:focus,input:focus{border-color:rgba(213,168,90,.55)}
     <a class="brand" href="index.html"><span class="mark"></span><span>The Observatory</span></a>
     <div class="navright">
       <a href="index.html">Public home</a>
+      <button id="todayTab">Today</button>
       <button id="resetAll">Reset shadow field</button>
     </div>
   </div>
@@ -357,6 +444,26 @@ textarea:focus,input:focus{border-color:rgba(213,168,90,.55)}
   </div>
 </section>
 
+
+<section class="today-shell" id="today">
+  <div class="today-head">
+    <div>
+      <div class="eyebrow">Today</div>
+      <h2>What needs movement now.</h2>
+      <p>
+        This is not every node in the field. It is the smallest set of things that appear to require action,
+        repair or protection today.
+      </p>
+    </div>
+    <div class="field-actions">
+      <button id="backToField">Back to field</button>
+    </div>
+  </div>
+  <div class="today-list" id="todayList">
+    <div class="today-empty">Generate your Observatory first.</div>
+  </div>
+</section>
+
 <script type="module">
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
@@ -432,6 +539,39 @@ function priorityFor(text, station, qIndex){
   return 'medium';
 }
 
+
+function routeReason(a,b,kind){
+  if(kind==='creation → action'){
+    return `You described something you want to bring into existence and also named a concrete move. The connection tests whether the action can serve the creation.`;
+  }
+  if(kind==='pressure ↔ stability'){
+    return `One answer describes what is consuming attention; the other describes what keeps you steady. They are connected because the stabilising condition may directly reduce the pressure load.`;
+  }
+  if(kind==='returning ↔ unresolved'){
+    return `Something keeps returning and something also remains unresolved. The field connects them because recurrence may be evidence that the unresolved matter still has a claim on attention.`;
+  }
+  if(kind==='release ↔ future'){
+    return `You named something that may be finished and also described the life you want next. The connection asks whether releasing the old material creates room for the desired future.`;
+  }
+  if(kind==='next move → desired state'){
+    return `You named a concrete next action and a one-month desired state. The field connects them to test whether the action is actually directional rather than merely busy.`;
+  }
+  if(kind==='shared field'){
+    return `Both answers were routed to ${a.station}. They are connected because they may be different expressions of the same underlying condition or project.`;
+  }
+  if(kind==='crossroads'){
+    const pair=[a.station,b.station].sort().join(' ↔ ');
+    const lookup={
+      'Forge ↔ Observatory':'One node is asking for observation or interpretation while the other is asking for action. The connection tests whether seeing the pattern should change what gets built or delivered.',
+      'Forge ↔ Harbour':'One node asks for action while the other protects stability. The connection tests whether progress can happen without consuming the conditions that make progress sustainable.',
+      'Garden ↔ Resolve':'One node is still growing while the other needs repair or closure. The connection tests whether resolution could free energy for the emerging thing, or whether the emerging thing changes how the repair should be understood.',
+      'Compost ↔ Garden':'One node may be ready to end while another is trying to grow. The connection tests whether releasing the old creates space for the new.'
+    };
+    return lookup[pair] || `These nodes sit in different parts of the field but may alter each other's meaning. Crossroads marks that relationship for inspection rather than assuming the interpretation is final.`;
+  }
+  return `These nodes were linked because the field detected a structural relationship between their source questions and their assigned spaces.`;
+}
+
 function titleFor(text, index){
   const raw=clean(text).replace(/\s+/g,' ');
   if(!raw) return '';
@@ -473,7 +613,7 @@ function makeFieldData(){
   function add(a,b,kind){
     if(!a||!b||a.id===b.id) return;
     if(routes.some(r=>(r.a===a.id&&r.b===b.id)||(r.a===b.id&&r.b===a.id))) return;
-    routes.push({a:a.id,b:b.id,kind});
+    routes.push({a:a.id,b:b.id,kind,reason:routeReason(a,b,kind)});
   }
 
   const byQ=q=>nodes.find(n=>n.q===q);
@@ -642,6 +782,9 @@ function renderField(data){
     const cross=r.kind==='crossroads';
     const mesh=makeRoute(a.position,b.position,cross);
     mesh.userData.kind=r.kind;
+    mesh.userData.reason=r.reason;
+    mesh.userData.a=a;
+    mesh.userData.b=b;
     routeGroup.add(mesh);
   }
 
@@ -696,6 +839,96 @@ function setView(p){
   camera.position.set(...p);controls.target.set(0,0,0);controls.update();
 }
 
+
+function deriveToday(data){
+  const tasks=[];
+  const seen=new Set();
+
+  function addTask(n,title,detail,deadline){
+    if(!n || seen.has(n.id)) return;
+    seen.add(n.id);
+    tasks.push({
+      node:n,
+      title:title || n.label,
+      detail,
+      deadline,
+      priority:n.priority
+    });
+  }
+
+  // Concrete action answer is always a Today candidate.
+  addTask(
+    data.nodes.find(n=>n.q===7),
+    null,
+    'This is the concrete move you named yourself. It belongs in Today because it already has an action form.',
+    'Today'
+  );
+
+  // Live repair belongs in Today if present.
+  const resolve=data.nodes.find(n=>n.station==='Resolve');
+  addTask(
+    resolve,
+    resolve ? `Move one repair: ${resolve.label}` : null,
+    'Resolve nodes remain cognitively expensive while they stay open. One bounded repair action is enough.',
+    'Today'
+  );
+
+  // High-priority stability gets protected.
+  const harbour=data.nodes.find(n=>n.station==='Harbour' && n.priority==='high') || data.nodes.find(n=>n.station==='Harbour');
+  addTask(
+    harbour,
+    harbour ? `Protect: ${harbour.label}` : null,
+    'Harbour enters Today when a stabilising condition is important enough that action or urgency could consume it.',
+    'Today'
+  );
+
+  // If no Forge q7, take one high-priority Forge item.
+  const forge=data.nodes.find(n=>n.station==='Forge' && !seen.has(n.id));
+  addTask(
+    forge,
+    forge ? `Advance: ${forge.label}` : null,
+    'This Forge node has a visible action/delivery character and is suitable for immediate movement.',
+    'This week'
+  );
+
+  return tasks.slice(0,4);
+}
+
+function renderToday(data){
+  const list=document.getElementById('todayList');
+  const tasks=deriveToday(data);
+  if(!tasks.length){
+    list.innerHTML='<div class="today-empty">No immediate Today items were derived from this reading.</div>';
+    return;
+  }
+  list.innerHTML=tasks.map(t=>`
+    <article class="today-item ${t.priority}">
+      <div class="today-top">
+        <div>
+          <div class="today-title">${escapeHtml(t.title)}</div>
+          <div class="today-meta">
+            <span class="today-pill">${escapeHtml(t.node.station)}</span>
+            <span class="today-pill">${escapeHtml(t.priority)} priority</span>
+          </div>
+        </div>
+        <div class="today-deadline">${escapeHtml(t.deadline)}</div>
+      </div>
+      <div class="today-detail">${escapeHtml(t.detail)}</div>
+    </article>
+  `).join('');
+}
+
+function showToday(){
+  if(!currentData.nodes.length){
+    document.getElementById('today').classList.add('active');
+    document.getElementById('todayList').innerHTML='<div class="today-empty">Generate your Observatory first.</div>';
+  }else{
+    renderToday(currentData);
+    document.getElementById('today').classList.add('active');
+  }
+  document.getElementById('today').scrollIntoView({behavior:'smooth'});
+}
+
 document.getElementById('generate').addEventListener('click',()=>{
   const data=makeFieldData();
   if(!data.nodes.length){
@@ -705,10 +938,16 @@ document.getElementById('generate').addEventListener('click',()=>{
   document.getElementById('field').classList.add('active');
   if(!renderer)initScene();
   renderField(data);
+  renderToday(data);
   setTimeout(()=>{resize();document.getElementById('field').scrollIntoView({behavior:'smooth'});},80);
   localStorage.setItem('observatory_shadow_answers',JSON.stringify(
     Array.from({length:8},(_,i)=>document.getElementById('q'+(i+1)).value)
   ));
+});
+
+document.getElementById('todayTab').addEventListener('click',showToday);
+document.getElementById('backToField').addEventListener('click',()=>{
+  document.getElementById('field').scrollIntoView({behavior:'smooth'});
 });
 
 document.getElementById('front').addEventListener('click',()=>setView([0,80,760]));
@@ -733,18 +972,34 @@ document.getElementById('crossroads').addEventListener('click',()=>{
     r.material.opacity=crossroadsMode?(r.userData.cross?1:.10):r.userData.baseOpacity;
     r.scale.x=r.scale.z=crossroadsMode?(r.userData.cross?1.7:1):1;
   }
-  document.getElementById('inspect').innerHTML=crossroadsMode?`
-    <h3>Crossroads</h3>
-    <div class="badge" style="color:#9bb9ff">transformation candidates</div>
-    <div class="detail">Blue routes mark places where different kinds of material may alter one another's meaning. This is where the field should ask a better question rather than simply assign another task.</div>
-    <div class="callout"><b>Reading rule</b>Crossroads is not a category. It is a relationship.</div>`:
-    '<h3>Inspector</h3><div class="detail">Select a node to inspect it.</div>';
+  if(crossroadsMode){
+    const crossRoutes=currentData.routes.filter(r=>r.kind==='crossroads');
+    const byId=new Map(currentData.nodes.map(n=>[n.id,n]));
+    const explanation=crossRoutes.length
+      ? crossRoutes.map(r=>{
+          const a=byId.get(r.a),b=byId.get(r.b);
+          return `<div class="callout">
+            <b>${escapeHtml(a.label)} ↔ ${escapeHtml(b.label)}</b>
+            ${escapeHtml(r.reason)}
+          </div>`;
+        }).join('')
+      : `<div class="callout"><b>No Crossroads candidate yet</b>The current answers do not create one of the structural contrasts this prototype is watching for.</div>`;
+    document.getElementById('inspect').innerHTML=`
+      <h3>Crossroads</h3>
+      <div class="badge" style="color:#9bb9ff">transformation candidates</div>
+      <div class="detail">Blue routes mark places where different kinds of material may alter one another's meaning.</div>
+      ${explanation}
+      <div class="callout"><b>Reading rule</b>Crossroads is not a category. It is a relationship, and the reason for that relationship should always be visible.</div>`;
+  }else{
+    document.getElementById('inspect').innerHTML='<h3>Inspector</h3><div class="detail">Select a node to inspect it.</div>';
+  }
 });
 
 document.getElementById('resetAll').addEventListener('click',()=>{
   for(let i=1;i<=8;i++)document.getElementById('q'+i).value='';
   localStorage.removeItem('observatory_shadow_answers');
   document.getElementById('field').classList.remove('active');
+  document.getElementById('today').classList.remove('active');
 });
 
 window.addEventListener('resize',resize);
