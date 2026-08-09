@@ -1,512 +1,654 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Your Observatory</title>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>The Observatory v0.7.2 · Relationship-Only Field</title>
+
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.185.0/build/three.module.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.185.0/examples/jsm/"
+  }
+}
+</script>
+
 <style>
 :root{
-  --bg:#07090d; --panel:#10141b; --ink:#f4efe6; --muted:#a9a59b; --line:#29313b;
-  --forge:#d7a653; --garden:#7bbd73; --harbour:#6cc1de; --resolve:#d58a6c;
-  --observatory:#d9cfb5; --archive:#9182ab; --compost:#7e6c58; --crossroads:#8daef0;
-  --high:#f1a18e; --medium:#e0c98a; --low:#8fd0a6;
+  --bg:#0d1219;
+  --panel:#11161d;
+  --panel2:#0d1218;
+  --line:#28303a;
+  --ink:#f1ede5;
+  --muted:#aca79d;
+  --accent:#d9cfb5;
+  --urgent:#ef766a;
+  --medium:#f2a65a;
 }
 *{box-sizing:border-box}
+html,body{margin:0;min-height:100%;background:var(--bg);color:var(--ink);font-family:Inter,system-ui,-apple-system,"Segoe UI",sans-serif}
 body{
-  margin:0;color:var(--ink);
-  font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;
   background:
-    radial-gradient(circle at 20% 0%, rgba(141,174,240,.08), transparent 25%),
-    radial-gradient(circle at 80% 10%, rgba(217,207,181,.08), transparent 22%),var(--bg);
+    radial-gradient(circle at 10% 0%,rgba(141,174,240,.06),transparent 24%),
+    radial-gradient(circle at 90% 0%,rgba(217,207,181,.06),transparent 22%),
+    var(--bg);
 }
-.wrap{max-width:1340px;margin:0 auto;padding:26px 18px 60px}
-.kicker{text-transform:uppercase;letter-spacing:.14em;color:var(--observatory);font-size:.75rem;margin-bottom:8px}
+.shell{max-width:1440px;margin:0 auto;padding:20px 18px 42px}
+.topbar{display:flex;justify-content:space-between;gap:14px;align-items:center;flex-wrap:wrap;margin-bottom:18px}
+.brand{font-size:.8rem;font-weight:800;letter-spacing:.16em;text-transform:uppercase;color:var(--accent)}
+.actions{display:flex;gap:8px;flex-wrap:wrap}
+.actions a,.actions button{
+  appearance:none;border:1px solid var(--line);background:#0e141b;color:var(--ink);
+  border-radius:999px;padding:8px 12px;text-decoration:none;font:inherit;font-size:.86rem;cursor:pointer
+}
+.actions a:hover,.actions button:hover{border-color:#4c5968}
+.hero{margin-bottom:14px}
+.kicker{font-size:.74rem;letter-spacing:.16em;text-transform:uppercase;color:var(--accent);margin-bottom:7px}
 h1,h2,h3,h4{font-family:Georgia,"Times New Roman",serif;font-weight:500;letter-spacing:-.02em;margin:0}
-h1{font-size:clamp(2.7rem,6.8vw,5.4rem);line-height:.96;margin-bottom:12px}
-.lead{max-width:980px;color:#d4cfc4;line-height:1.68;font-size:1.05rem;margin:0 0 22px}
-.layout{display:grid;grid-template-columns:minmax(320px,1.35fr) minmax(320px,.75fr);gap:18px;align-items:start}
-.card{
-  border:1px solid var(--line);background:linear-gradient(180deg,rgba(255,255,255,.025),rgba(255,255,255,.012));
-  border-radius:24px;padding:16px
-}
-.system-head{display:flex;justify-content:space-between;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:12px}
-.controls{display:flex;gap:8px;flex-wrap:wrap}
-button{
-  appearance:none;border:1px solid var(--line);background:#10161e;color:var(--ink);
-  padding:9px 13px;border-radius:999px;cursor:pointer;font:inherit
-}
-button:hover{border-color:#465364}
-.tabbar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
-.tab{border:1px solid var(--line);background:#0f151c;color:var(--muted);border-radius:999px;padding:9px 13px;cursor:pointer;font-size:.92rem}
-.tab.active{color:var(--ink);border-color:#5a6675;background:#131a22}
-.view{display:none}.view.active{display:block}
+h1{font-size:clamp(2.6rem,5.8vw,4.8rem);line-height:.98;margin-bottom:8px}
+.lead{max-width:930px;color:#d0cbc1;line-height:1.65;margin:0}
+.layout{display:grid;grid-template-columns:minmax(0,1.45fr) minmax(310px,.72fr);gap:18px;align-items:start}
+.card{border:1px solid var(--line);background:linear-gradient(180deg,rgba(255,255,255,.025),rgba(255,255,255,.012));border-radius:24px}
+.field-card{padding:14px}
+.field-head{display:flex;justify-content:space-between;gap:12px;align-items:center;flex-wrap:wrap;padding:4px 3px 12px}
+.field-head .small{max-width:650px}
+.small{color:var(--muted);font-size:.88rem;line-height:1.55}
 .viewport{
-  position:relative;width:100%;aspect-ratio:1/1;border-radius:26px;overflow:hidden;
-  border:1px solid rgba(255,255,255,.055);
-  background:radial-gradient(circle at 50% 50%,rgba(23,29,39,.92),rgba(8,10,14,.99) 70%);
-  cursor:grab;touch-action:none
+  position:relative;
+  width:100%;
+  min-height:650px;
+  height:min(76vh,760px);
+  border-radius:22px;
+  overflow:hidden;
+  border:1px solid rgba(255,255,255,.05);
+  background:
+    radial-gradient(circle at 50% 48%,rgba(58,70,90,.78),rgba(10,14,20,.97) 70%);
 }
-.viewport.dragging{cursor:grabbing}
-svg{display:block;width:100%;height:100%}
-.legend{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
-.legend span{border:1px solid var(--line);border-radius:999px;padding:7px 10px;color:var(--muted);font-size:.78rem}
-.note{margin-top:14px;color:var(--muted);font-size:.9rem;line-height:1.6}
-.side{display:grid;gap:16px;position:sticky;top:18px}
-.section-title{font-size:1.4rem;margin:0 0 8px}
-.empty{color:var(--muted);line-height:1.62}
-.badge{display:inline-block;border:1px solid var(--line);padding:5px 9px;border-radius:999px;font-size:.73rem;letter-spacing:.08em;text-transform:uppercase;margin:4px 0 10px}
-.detail-text{color:#d8d3c8;line-height:1.6;margin-bottom:12px}
-.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin:10px 0 14px}
-.metric{border:1px solid var(--line);background:rgba(255,255,255,.02);border-radius:14px;padding:10px 8px}
-.metric b{display:block;font-size:1rem}.metric span{display:block;color:var(--muted);font-size:.74rem;margin-top:4px}
-.dep-list{padding-left:18px;color:#d5d0c6;line-height:1.58;margin:8px 0}
-.action{
-  border:1px solid rgba(241,211,156,.25);background:rgba(241,211,156,.06);
-  border-radius:16px;padding:12px 12px;margin-top:12px
+#three{position:absolute;inset:0}
+.overlay{
+  position:absolute;left:14px;bottom:12px;display:flex;gap:7px;flex-wrap:wrap;pointer-events:none
 }
-.action h4{margin:0 0 8px;font-size:1rem;font-family:Inter,sans-serif}
-.action ul{margin:0;padding-left:18px;color:#e2dccf;line-height:1.55}
-.small{color:var(--muted);font-size:.88rem;line-height:1.58}
-.task-board{display:grid;gap:12px}
-.task{border:1px solid var(--line);background:rgba(255,255,255,.015);border-radius:18px;padding:14px}
-.task-title{font-size:1.08rem;font-family:Georgia,serif}
-.task-meta{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0}
-.pill{border:1px solid var(--line);padding:5px 8px;border-radius:999px;color:var(--muted);font-size:.76rem}
-.priority-high{color:var(--high);border-color:rgba(241,161,142,.35)}
-.priority-medium{color:var(--medium);border-color:rgba(224,201,138,.35)}
-.priority-low{color:var(--low);border-color:rgba(143,208,166,.35)}
-.deadline{color:#f1d39c;border-color:rgba(241,211,156,.35)}
-.route-state{border:1px solid rgba(255,255,255,.06);background:rgba(255,255,255,.02);padding:12px;border-radius:16px;margin-top:10px}
-.station-list{display:grid;gap:8px;margin-top:10px}
-.station-item{
-  border:1px solid var(--line);background:rgba(255,255,255,.015);border-radius:14px;padding:10px
+.overlay span{
+  font-size:.72rem;color:#b7b2a9;border:1px solid rgba(255,255,255,.08);
+  background:rgba(7,10,14,.72);backdrop-filter:blur(8px);padding:6px 8px;border-radius:999px
 }
-.station-item strong{display:block;margin-bottom:3px}
-.station-item span{color:var(--muted);font-size:.82rem}
-.cross-card{
-  border:1px solid rgba(141,174,240,.28);background:rgba(141,174,240,.06);
-  border-radius:16px;padding:12px;margin-top:10px
+.side{display:grid;gap:16px;position:sticky;top:16px}
+.side .card{padding:16px}
+.section-title{font-size:1.4rem;margin-bottom:8px}
+.inspector-empty{color:var(--muted);line-height:1.62}
+.badge{
+  display:inline-block;border:1px solid var(--line);border-radius:999px;padding:5px 9px;
+  font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;margin:8px 0 11px
 }
-@media(max-width:960px){.layout{grid-template-columns:1fr}.side{position:static}}
+.detail{color:#d8d3c8;line-height:1.62;margin-bottom:10px}
+.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin:12px 0}
+.metric{border:1px solid var(--line);border-radius:14px;padding:10px;background:rgba(255,255,255,.02)}
+.metric b{display:block;font-size:.94rem}
+.metric span{display:block;color:var(--muted);font-size:.72rem;margin-top:4px}
+.dep{margin:8px 0;padding-left:18px;color:#d5d0c6;line-height:1.55}
+.actionbox{
+  margin-top:12px;border:1px solid rgba(217,207,181,.22);background:rgba(217,207,181,.05);
+  border-radius:16px;padding:12px
+}
+.actionbox h4{font-family:Inter,sans-serif;font-size:.9rem;margin-bottom:7px}
+.actionbox ul{margin:0;padding-left:18px;line-height:1.55;color:#e0dacd}
+.axiskey{display:grid;gap:8px;margin-top:10px}
+.axisrow{border:1px solid var(--line);border-radius:14px;padding:10px;background:rgba(255,255,255,.02);font-size:.88rem;line-height:1.5}
+.axisrow b{display:block;margin-bottom:3px}
+.status-dot{width:8px;height:8px;border-radius:50%;display:inline-block;margin-right:7px;vertical-align:1px}
+
+.gizmo{
+  position:absolute;right:14px;bottom:14px;width:96px;height:96px;
+  border:1px solid rgba(255,255,255,.10);
+  border-radius:18px;background:rgba(7,10,14,.72);
+  backdrop-filter:blur(8px);
+  display:grid;place-items:center;
+}
+.gizmo svg{width:74px;height:74px;overflow:visible}
+.gizmo text{font:700 10px Inter,Arial;fill:#e9e4da}
+.gizmo line{stroke-width:2.2;stroke-linecap:round}
+
+@media(max-width:980px){
+  .layout{grid-template-columns:1fr}
+  .side{position:static}
+  .viewport{height:68vh;min-height:520px}
+}
+@media(max-width:600px){
+  .viewport{height:62vh;min-height:460px}
+  h1{font-size:3rem}
+}
 </style>
 </head>
 <body>
-<div style="max-width:1340px;margin:0 auto;padding:16px 18px 0;display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap">
-  <a href="index.html" style="color:#f4efe6;text-decoration:none;font-weight:700;letter-spacing:.08em;text-transform:uppercase;font-size:.78rem">The Observatory</a>
-  <div style="display:flex;gap:8px">
-    <a href="app.html" style="color:#f4efe6;text-decoration:none;border:1px solid #29313b;padding:8px 12px;border-radius:999px;font-size:.85rem">System field</a>
-    <a href="today.html" style="color:#a9a59b;text-decoration:none;border:1px solid #29313b;padding:8px 12px;border-radius:999px;font-size:.85rem">Today</a>
+<div class="shell">
+  <div class="topbar">
+    <div class="brand">The Observatory · v0.7.2 relationship-only field</div>
+    <div class="actions">
+      <a href="index.html">Home</a>
+      <a href="app.html">Current system</a>
+      <a href="today.html">Today</a>
+      <button id="front">Front</button>
+      <button id="top">Top</button>
+      <button id="side">Side</button>
+      <button id="reset">Reset</button>
+      <button id="routes">Highlight routes</button>
+      <button id="crossroads">Crossroads</button>
+    </div>
   </div>
-</div>
-<div class="wrap">
-  <div class="kicker">Your Observatory</div>
-  <h1>Operational inspector wired in.</h1>
-  <p class="lead">
-    Every station and node now drives the panel on the right. Stations show what they contain and a brief status report.
-    Nodes show position, priority, time horizon, dependencies, and next movement.
-    Crossroads can take over the inspector with a dedicated connection analysis and a Forge implication.
-  </p>
+
+  <section class="hero">
+    <div class="kicker">True spatial field</div>
+    <h1>The map can now be entered.</h1>
+    <p class="lead">
+      Orbit the field, move through depth, inspect nodes and read relationships from more than one plane.
+      The geometry is real now. This pass sharpens the field so relationships remain legible at ordinary viewing distance.
+    </p>
+  </section>
 
   <div class="layout">
-    <section class="card">
-      <div class="system-head">
+    <section class="card field-card">
+      <div class="field-head">
         <div>
           <h2 class="section-title">System field</h2>
-          <div class="small">Drag to rotate. Release to park. Click anything to inspect.</div>
-        </div>
-        <div class="controls">
-          <button id="resetBtn">Reset view</button>
-          <button id="crossBtn">Punch up Crossroads</button>
-          <button id="routesBtn">Hide routes</button>
+          <div class="small">Drag to orbit. Scroll to move through depth. Right-drag to pan. Click any node to inspect it.</div>
         </div>
       </div>
 
-      <div class="tabbar">
-        <div class="tab active" data-tab="fieldView">System field</div>
-        <div class="tab" data-tab="tasksView">Daily tasks</div>
-      </div>
-
-      <div id="fieldView" class="view active">
-        <div class="viewport" id="viewport">
-          <svg id="stage" viewBox="0 0 1000 1000" aria-label="Rotational Observatory system"></svg>
+      <div class="viewport">
+        <div id="three"></div>
+        <div class="overlay">
+          <span>Every line = a relationship</span>
+          <span>Crossroads = transformation</span>
         </div>
-        <div class="legend">
-          <span>Click station = contents + status</span>
-          <span>Click node = issue snapshot</span>
-          <span>Bright paths = routes</span>
-          <span>Blue arcs = Crossroads</span>
-        </div>
-      </div>
 
-      <div id="tasksView" class="view">
-        <div class="task-board" id="taskBoard"></div>
+        <div class="gizmo" aria-label="Field orientation">
+          <svg viewBox="0 0 74 74" role="img">
+            <circle cx="37" cy="37" r="3.5" fill="#f1ede5"/>
+            <line x1="37" y1="37" x2="64" y2="37" stroke="#6cc1de"/>
+            <line x1="37" y1="37" x2="37" y2="10" stroke="#d9cfb5"/>
+            <line x1="37" y1="37" x2="20" y2="57" stroke="#d58a6c"/>
+            <text x="66" y="40">X</text>
+            <text x="34" y="8">Y</text>
+            <text x="13" y="63">Z</text>
+          </svg>
+        </div>
       </div>
     </section>
 
     <aside class="side">
       <section class="card">
-        <h2 class="section-title">Operational inspector</h2>
-        <div id="detail" class="empty">
-          Select a station or node. The panel will refresh immediately.
+        <h2 class="section-title">Inspector</h2>
+        <div id="inspector" class="inspector-empty">
+          Select a node. The field will remain spatial while the meaning stays here, where humans can still read sentences without rotating their heads.
         </div>
       </section>
 
       <section class="card">
-        <h2 class="section-title">Current logic</h2>
-        <div class="small">
-          <p><strong>Observatory</strong> diagnoses and routes.</p>
-          <p><strong>Garden</strong> grows what is alive.</p>
-          <p><strong>Forge</strong> makes and delivers.</p>
-          <p><strong>Harbour</strong> protects stability.</p>
-          <p><strong>Resolve</strong> repairs and returns.</p>
-          <p><strong>Archive / Compost</strong> retain and release.</p>
-          <p><strong>Crossroads</strong> reveals transformation between things.</p>
+        <h2 class="section-title">Axis logic</h2>
+        <div class="axiskey">
+          <div class="axisrow"><b style="color:#6cc1de">X · relational neighbourhood</b>What sits beside what, and what is structurally adjacent.</div>
+          <div class="axisrow"><b style="color:#d9cfb5">Y · state altitude</b>Material held above the field, active within it, or moving below present circulation.</div>
+          <div class="axisrow"><b style="color:#d58a6c">Z · foreground / background</b>What is immediately present versus deeper context that becomes legible when the field turns.</div>
+          <div class="axisrow"><b>Orientation marker</b>The X/Y/Z compass lives in the corner only. Lines inside the field now represent relationships between nodes, nothing else.</div>
         </div>
       </section>
     </aside>
   </div>
 </div>
 
-<script>
-const stage = document.getElementById('stage');
-const viewport = document.getElementById('viewport');
-const detail = document.getElementById('detail');
-const resetBtn = document.getElementById('resetBtn');
-const crossBtn = document.getElementById('crossBtn');
-const routesBtn = document.getElementById('routesBtn');
-const taskBoard = document.getElementById('taskBoard');
+<script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 
-const C={x:500,y:500}, R=300;
+const mount = document.getElementById('three');
+const inspector = document.getElementById('inspector');
 
-const stations=[
-{id:'observatory',label:'Observatory',color:'#d9cfb5',angle:-90,radius:R,type:'station',priority:'high',time:'today / ongoing',
- what:'The perch and routing station.',why:'Used to diagnose the field, recognise patterns, and determine what gets promoted into motion.',
- dependencies:['garden','forge','resolve','harbour'],routes:['Mostly to Garden','Often to Forge','Sometimes to Resolve','Receives from Harbour'],
- next:['See before acting','Promote the right thing into motion']},
-{id:'garden',label:'Garden',color:'#7bbd73',angle:-20,radius:R,type:'station',priority:'medium',time:'this week',
- what:'Live growth and protected development.',why:'Holds questions, early ideas, and material that is alive but not yet ready for pressure.',
- dependencies:['observatory','forge','crossroads'],routes:['Receives from Observatory','Can promote to Forge','Feeds Crossroads'],
- next:['Protect and tend','Promote one viable object']},
-{id:'forge',label:'Forge',color:'#d7a653',angle:35,radius:R,type:'station',priority:'high',time:'today',
- what:'Making, delivery, publication and visible action.',why:'This is where the system becomes real in the world.',
- dependencies:['garden','observatory','harbour'],routes:['Often receives from Garden','May receive from Observatory','Sometimes requires Harbour support'],
- next:['Define next move','Deliver visible output']},
-{id:'resolve',label:'Resolve',color:'#d58a6c',angle:115,radius:R,type:'station',priority:'medium',time:'today / this week',
- what:'Repair, truth, closure and return.',why:'Residue becomes less costly when one repairable thing is addressed.',
- dependencies:['observatory','harbour'],routes:['Receives diagnosis from Observatory','May need Harbour support'],
- next:['Repair one thing','Reduce residue']},
-{id:'archive',label:'Archive',color:'#9182ab',angle:185,radius:R,type:'station',priority:'low',time:'later',
- what:'Retained memory without active obligation.',why:'Stores useful context without demanding present attention.',
- dependencies:['observatory'],routes:['Below active circulation','Can occasionally feed Observatory'],next:['Retain without debt']},
-{id:'compost',label:'Compost',color:'#7e6c58',angle:235,radius:R,type:'station',priority:'low',time:'later',
- what:'Release, decomposition and letting go.',why:'Allows dead obligations or beliefs to stop consuming the active field.',
- dependencies:['observatory'],routes:['Below active circulation','May release pressure on the whole field'],next:['Let dead things die well']},
-{id:'harbour',label:'Harbour',color:'#6cc1de',angle:305,radius:R,type:'station',priority:'high',time:'today / ongoing',
- what:'Protected stability conditions.',why:'The rest of the system becomes less inhabitable when Harbour is neglected.',
- dependencies:['observatory','forge','resolve'],routes:['Can feed Observatory','Can support Forge','Can stabilise Resolve'],
- next:['Protect baseline conditions','Support without justifying itself']}
-];
+const scene = new THREE.Scene();
+scene.fog = new THREE.FogExp2(0x0d1219, 0.00072);
 
-const nodes=[
-{id:'website',label:'Website launch',station:'forge',orbit:.72,offset:-18,color:'#f1d39c',type:'node',priority:'high',time:'today',
- what:'The first public surface of the work.',importance:'This converts possibility into visible reality.',why:'It is the action gateway for the whole system.',
- deps:['game','observatory-note','sleep'],next:['Draft one public page','Place one real module','Publish live link tonight'],
- actions:['Build landing shell','Attach one real object','Define done as “public and reachable”'],status:'In active delivery'},
-{id:'game',label:'Game idea',station:'garden',orbit:.72,offset:12,color:'#b7ddb0',type:'node',priority:'medium',time:'this week',
- what:'A generative creative object.',importance:'It links identity, mastery and chosen visibility.',why:'Not just a hobby. It connects the creative and social system.',
- deps:['visibility','website'],next:['Protect and shape the concept','Promote a small piece into Forge'],actions:['Play / test the core room','Note one improvement'],status:'Growing'},
-{id:'bullying',label:'Fear of being singled out',station:'observatory',orbit:.70,offset:-24,color:'#eadfcb',type:'node',priority:'high',time:'ongoing',
- what:'A high-mass social concern.',importance:'Influences movement across the wider field.',why:'Needs observation and interpretation rather than automatic obedience.',
- deps:['visibility'],next:['Observe trigger pattern','Reduce its jurisdiction over action'],actions:[],status:'High attention load'},
-{id:'visibility',label:'Chosen visibility',station:'crossroads',orbit:.38,offset:0,color:'#8daef0',type:'node',priority:'medium',time:'this week',
- what:'A transformation node.',importance:'This is the crossroads where exposure changes meaning.',why:'It links being noticed as target to being noticed as author.',
- deps:['bullying','game','masking'],next:['Make authorship safely visible'],actions:[],status:'Cross-domain hypothesis'},
-{id:'sleep',label:'Sleep',station:'harbour',orbit:.70,offset:-10,color:'#97d6ea',type:'node',priority:'high',time:'tonight',
- what:'A baseline stabiliser.',importance:'It supports the whole field.',why:'Everything performs worse when this is neglected.',
- deps:['website'],next:['Protect tonight’s sleep boundary'],actions:['Stop work by a set time'],status:'Must protect'},
-{id:'friend',label:'Reply to best friend',station:'resolve',orbit:.70,offset:10,color:'#e0aa94',type:'node',priority:'high',time:'today',
- what:'A repairable relationship action.',importance:'A small honest move may stabilise the wider field.',why:'This is a clear residue reduction action.',
- deps:[],next:['Send one honest message today'],actions:['Choose the one message','State truth simply','Do not overperform remorse'],status:'Open repair'},
-{id:'masking',label:'Act normal enough',station:'compost',orbit:.72,offset:8,color:'#ab9a87',type:'node',priority:'low',time:'later',
- what:'A belief candidate for release.',importance:'May no longer deserve sovereignty over the present.',why:'A survival belief that may be outliving its usefulness.',
- deps:['visibility'],next:['Test whether authorship can replace camouflage'],actions:[],status:'Candidate for release'},
-{id:'oldwork',label:'Old assignments',station:'archive',orbit:.72,offset:-8,color:'#b5a9c8',type:'node',priority:'low',time:'later',
- what:'Dormant school residue.',importance:'Context, not command.',why:'Retained for reference rather than active guilt.',
- deps:[],next:['Retain as context only'],actions:[],status:'Dormant'},
-{id:'observatory-note',label:'Observatory note',station:'observatory',orbit:.50,offset:18,color:'#efe5cb',type:'node',priority:'medium',time:'today',
- what:'A synthesis note.',importance:'Turns diagnosis into routing.',why:'This is where recognition becomes decision.',
- deps:['game','website','friend','sleep'],next:['Promote what is ready','Protect what must remain held'],actions:[],status:'Routing note'}
-];
+const camera = new THREE.PerspectiveCamera(45, 1, 1, 3000);
+camera.position.set(430, 320, 560);
 
-const dailyTasks=[
-{title:'Reply to that friend',station:'resolve',priority:'high',due:'Tonight',note:'One honest message. Keep it simple.'},
-{title:'Write the public page',station:'forge',priority:'high',due:'Tonight',note:'Landing shell + one real object.'},
-{title:'Play / test the game room',station:'garden',priority:'medium',due:'Today',note:'Check the core experience and note one improvement.'},
-{title:'Protect sleep',station:'harbour',priority:'high',due:'Tonight',note:'Stop work by a set time so Harbour is not sacrificed to Forge.'}
-];
+const renderer = new THREE.WebGLRenderer({ antialias:true, alpha:true });
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+renderer.outputColorSpace = THREE.SRGBColorSpace;
+mount.appendChild(renderer.domElement);
 
-const nodeMap=Object.fromEntries(nodes.map(n=>[n.id,n]));
-const stationMap=Object.fromEntries(stations.map(s=>[s.id,s]));
-const stationRoutes=[['observatory','garden'],['observatory','forge'],['observatory','resolve'],['garden','forge'],['harbour','observatory'],['harbour','forge'],['harbour','resolve'],['archive','observatory'],['compost','observatory']];
+const controls = new OrbitControls(camera, renderer.domElement);
+controls.enableDamping = true;
+controls.dampingFactor = 0.065;
+controls.enablePan = true;
+controls.enableZoom = true;
+controls.minDistance = 300;
+controls.maxDistance = 1350;
+controls.target.set(0,0,0);
+controls.update();
 
-let angleOffset=0,dragging=false,lastAngle=0,emphasizeCross=false,showRoutes=true;
+const ambient = new THREE.AmbientLight(0xffffff, 2.05);
+scene.add(ambient);
 
-function priorityClass(p){return p==='high'?'priority-high':p==='medium'?'priority-medium':'priority-low'}
-function renderTasks(){
-  taskBoard.innerHTML=dailyTasks.map(t=>`
-    <div class="task">
-      <div class="task-title">${t.title}</div>
-      <div class="task-meta">
-        <span class="pill ${priorityClass(t.priority)}">${t.priority} priority</span>
-        <span class="pill">${stationMap[t.station].label}</span>
-        <span class="pill deadline">deadline ${t.due.toLowerCase()}</span>
-      </div>
-      <div class="detail-text">${t.note}</div>
-    </div>`).join('');
-}
-function pt(angleDeg,radius){
-  const a=(angleDeg+angleOffset)*Math.PI/180;
-  return {x:C.x+Math.cos(a)*radius,y:C.y+Math.sin(a)*radius}
-}
-function nodePoint(node){
-  if(node.station==='crossroads') return {x:C.x,y:C.y-6};
-  const s=stationMap[node.station], base=pt(s.angle,s.radius*node.orbit), a=(s.angle+angleOffset)*Math.PI/180;
-  const tangent={x:-Math.sin(a),y:Math.cos(a)};
-  return {x:base.x+tangent.x*node.offset,y:base.y+tangent.y*node.offset}
-}
-function pathArc(p1,p2,bend=34){
-  const mx=(p1.x+p2.x)/2,my=(p1.y+p2.y)/2,dx=p2.x-p1.x,dy=p2.y-p1.y,len=Math.hypot(dx,dy)||1;
-  const nx=-dy/len,ny=dx/len;return `M ${p1.x} ${p1.y} Q ${mx+nx*bend} ${my+ny*bend} ${p2.x} ${p2.y}`
-}
-function E(tag,attrs={}){
-  const el=document.createElementNS('http://www.w3.org/2000/svg',tag);
-  Object.entries(attrs).forEach(([k,v])=>el.setAttribute(k,v));return el
-}
-function labelShort(txt,n=16){return txt.length>n?txt.slice(0,n-1)+'…':txt}
+const keyLight = new THREE.DirectionalLight(0xf7f0df, 2.8);
+keyLight.position.set(420,500,300);
+scene.add(keyLight);
 
-function render(){
-  stage.innerHTML='';
-  const defs=E('defs'),glow=E('filter',{id:'glow'});
-  glow.appendChild(E('feGaussianBlur',{stdDeviation:'4',result:'blur'}));
-  const merge=E('feMerge');merge.appendChild(E('feMergeNode',{in:'blur'}));merge.appendChild(E('feMergeNode',{in:'SourceGraphic'}));glow.appendChild(merge);defs.appendChild(glow);stage.appendChild(defs);
+const rimLight = new THREE.PointLight(0x9bb9ff, 1600, 1300, 2);
+rimLight.position.set(-420,160,-240);
+scene.add(rimLight);
 
-  stage.appendChild(E('circle',{cx:C.x,cy:C.y,r:348,fill:'none',stroke:'rgba(255,255,255,.055)','stroke-width':'1.2'}));
-  stage.appendChild(E('circle',{cx:C.x,cy:C.y,r:232,fill:'none',stroke:'rgba(255,255,255,.03)','stroke-width':'1'}));
-  stage.appendChild(E('circle',{cx:C.x,cy:C.y,r:125,fill:'none',stroke:'rgba(255,255,255,.025)','stroke-width':'1'}));
+const warmLight = new THREE.PointLight(0xe8b55e, 1200, 1150, 2);
+warmLight.position.set(320,-200,350);
+scene.add(warmLight);
 
-  if(showRoutes){
-    stationRoutes.forEach(([a,b])=>{
-      const p1=pt(stationMap[a].angle,stationMap[a].radius-34),p2=pt(stationMap[b].angle,stationMap[b].radius-34);
-      stage.appendChild(E('path',{d:pathArc(p1,p2,26),fill:'none',stroke:'rgba(255,255,255,.18)','stroke-width':'2.2','stroke-linecap':'round',filter:'url(#glow)'}));
-    })
+const nodeData = [
+  {
+    id:'observatory', label:'Observatory', color:0xd9cfb5, position:[0,210,70],
+    type:'station', priority:'high', time:'today / ongoing', status:'Scanning and routing',
+    region:'upper perch',
+    description:'The observing perch. Diagnosis, pattern recognition and deciding what should move.',
+    why:'Without a place to observe the whole, every claim on attention arrives dressed as urgency.',
+    dependencies:['Garden','Forge','Resolve','Harbour'],
+    next:['See before acting','Promote the right thing into motion']
+  },
+  {
+    id:'garden', label:'Garden', color:0x7bbd73, position:[-210,-145,105],
+    type:'station', priority:'medium', time:'this week', status:'Growing',
+    region:'growth zone',
+    description:'Where early things grow: questions, experiments, emerging interests and unfinished forms.',
+    why:'Some material becomes worse when forced into premature delivery.',
+    dependencies:['Observatory','Forge','Crossroads'],
+    next:['Tend what is alive','Promote one viable object when ready']
+  },
+  {
+    id:'forge', label:'Forge', color:0xd7a653, position:[205,-35,205],
+    type:'station', priority:'high', time:'today', status:'Active delivery',
+    region:'action vector',
+    description:'Where ideas become real in the world through making, sending, publishing and finishing.',
+    why:'The field needs a place where thought becomes consequence.',
+    dependencies:['Garden','Observatory','Harbour'],
+    next:['Deliver visible output','Make one thing publicly real']
+  },
+  {
+    id:'harbour', label:'Harbour', color:0x6cc1de, position:[-205,55,-220],
+    type:'station', priority:'high', time:'today / ongoing', status:'Protect baseline',
+    region:'stability basin',
+    description:'Protected conditions: rest, safety, stability and the infrastructure required to remain inhabitable.',
+    why:'Without Harbour the rest of the field becomes brittle, extractive and stupid.',
+    dependencies:['Observatory','Forge','Resolve'],
+    next:['Protect baseline conditions','Do not sacrifice Harbour to momentum']
+  },
+  {
+    id:'resolve', label:'Resolve', color:0xd58a6c, position:[150,-15,-235],
+    type:'station', priority:'medium', time:'today / this week', status:'Open repair',
+    region:'repair arc',
+    description:'Repair, overdue truth, response, apology, closure and completion.',
+    why:'Repairable residue consumes attention until somebody actually resolves it.',
+    dependencies:['Observatory','Harbour','Crossroads'],
+    next:['Reduce residue','Repair one thing at a time']
+  },
+  {
+    id:'archive', label:'Archive', color:0x9182ab, position:[-110,-220,-105],
+    type:'station', priority:'low', time:'later', status:'Dormant',
+    region:'retained context',
+    description:'Material that remains available as context without remaining an active obligation.',
+    why:'Remembering does not require permanent activation.',
+    dependencies:['Observatory'],
+    next:['Retain as context only']
+  },
+  {
+    id:'compost', label:'Compost', color:0x7e6c58, position:[100,-235,-35],
+    type:'station', priority:'low', time:'later', status:'Candidate release',
+    region:'release basin',
+    description:'Where finished or dead material can break down and stop claiming present energy.',
+    why:'Release is part of intelligence. Persistence is not automatically virtue.',
+    dependencies:['Observatory'],
+    next:['Let dead things leave the active field']
+  },
+  {
+    id:'crossroads', label:'Crossroads', color:0x8daef0, position:[0,0,0],
+    type:'intersection', priority:'medium', time:'this week', status:'Transformation analysis',
+    region:'intersection logic',
+    description:'Where trajectories intersect and one thing can change the meaning of another.',
+    why:'Important relationships can remain invisible until the field is viewed from another orientation.',
+    dependencies:['Observatory','Garden','Forge','Harbour','Resolve'],
+    next:['Surface transformations before action','Reveal non-obvious relationships']
   }
+];
 
-  const crossRing=E('circle',{cx:C.x,cy:C.y,r:92,fill:'rgba(141,174,240,.07)',stroke:'rgba(141,174,240,'+(emphasizeCross?'.95':'.45')+')','stroke-width':emphasizeCross?'3':'1.8',style:'cursor:pointer','data-crossroads':'1'});
-  
-  stage.appendChild(crossRing);
+const nodeGroup = new THREE.Group();
+scene.add(nodeGroup);
 
-  const crossTxt=E('text',{x:C.x,y:C.y+5,'text-anchor':'middle','font-family':'Inter,sans-serif','font-size':'12','letter-spacing':'1.8',fill:'#8daef0',style:'cursor:pointer','data-crossroads':'1'});
-  crossTxt.textContent='CROSSROADS';stage.appendChild(crossTxt);
+const clickable = [];
+const meshById = new Map();
+const labelById = new Map();
 
-  stage.appendChild(E('circle',{cx:C.x,cy:C.y,r:36,fill:'rgba(12,16,22,.96)',stroke:'rgba(255,255,255,.14)','stroke-width':'1.5'}));
-  const self=E('text',{x:C.x,y:C.y+4,'text-anchor':'middle','font-family':'Georgia,serif','font-size':'16',fill:'#f4efe6'});self.textContent='SELF';stage.appendChild(self);
+function makeLabel(text, color='#f1ede5'){
+  const canvas = document.createElement('canvas');
+  const ctx = canvas.getContext('2d');
+  const dpr = 2;
+  ctx.font = `700 ${16*dpr}px Inter, Arial`;
+  const metrics = ctx.measureText(text);
+  const w = Math.ceil(metrics.width + 40*dpr);
+  const h = 40*dpr;
+  canvas.width = w;
+  canvas.height = h;
+  ctx.font = `700 ${16*dpr}px Inter, Arial`;
+  ctx.fillStyle = 'rgba(5,8,12,.94)';
+  roundRect(ctx,0,0,w,h,17*dpr);
+  ctx.fill();
+  ctx.strokeStyle = 'rgba(255,255,255,.22)';
+  ctx.lineWidth = 1*dpr;
+  ctx.stroke();
+  ctx.fillStyle = color;
+  ctx.textAlign='center';
+  ctx.textBaseline='middle';
+  ctx.fillText(text,w/2,h/2+1*dpr);
 
-  stations.forEach(st=>{
-    const p=pt(st.angle,st.radius),g=E('g',{style:'cursor:pointer','data-station':st.id});
-    [E('circle',{cx:p.x,cy:p.y,r:74,fill:st.color,opacity:'.08'}),E('circle',{cx:p.x,cy:p.y,r:54,fill:st.color,opacity:'.18',stroke:st.color,'stroke-width':'2.4'}),E('circle',{cx:p.x,cy:p.y,r:40,fill:'rgba(12,15,20,.85)',stroke:'rgba(255,255,255,.07)'})].forEach(x=>g.appendChild(x));
-    const label=E('text',{x:p.x,y:p.y+4,'text-anchor':'middle','font-family':'Inter,sans-serif','font-size':'11.5','letter-spacing':'1.3',fill:st.color});label.textContent=st.label.toUpperCase();g.appendChild(label);
-    stage.appendChild(g)
+  const texture = new THREE.CanvasTexture(canvas);
+  texture.colorSpace = THREE.SRGBColorSpace;
+  const material = new THREE.SpriteMaterial({ map:texture, transparent:true, depthWrite:false });
+  const sprite = new THREE.Sprite(material);
+  const scale = 0.39;
+  sprite.scale.set(w*scale,h*scale,1);
+  return sprite;
+}
+
+function roundRect(ctx,x,y,w,h,r){
+  ctx.beginPath();
+  ctx.moveTo(x+r,y);
+  ctx.lineTo(x+w-r,y);
+  ctx.quadraticCurveTo(x+w,y,x+w,y+r);
+  ctx.lineTo(x+w,y+h-r);
+  ctx.quadraticCurveTo(x+w,y+h,x+w-r,y+h);
+  ctx.lineTo(x+r,y+h);
+  ctx.quadraticCurveTo(x,y+h,x,y+h-r);
+  ctx.lineTo(x,y+r);
+  ctx.quadraticCurveTo(x,y,x+r,y);
+  ctx.closePath();
+}
+
+for(const d of nodeData){
+  const group = new THREE.Group();
+  group.position.set(...d.position);
+
+  const radius = d.id === 'crossroads' ? 24 : 20;
+  const geometry = new THREE.SphereGeometry(radius, 36, 24);
+  const material = new THREE.MeshStandardMaterial({
+    color:d.color,
+    roughness:0.26,
+    metalness:0.12,
+    emissive:d.color,
+    emissiveIntensity:d.id === 'crossroads' ? 0.58 : 0.30
+  });
+  const sphere = new THREE.Mesh(geometry,material);
+  sphere.userData = d;
+  group.add(sphere);
+
+  const haloGeo = new THREE.SphereGeometry(radius*1.85,24,18);
+  const haloMat = new THREE.MeshBasicMaterial({
+    color:d.color,
+    transparent:true,
+    opacity:d.id === 'crossroads' ? 0.16 : 0.075,
+    depthWrite:false
+  });
+  const halo = new THREE.Mesh(haloGeo,haloMat);
+  group.add(halo);
+
+  const label = makeLabel(d.label);
+  label.position.set(0, radius+34, 0);
+  group.add(label);
+
+  nodeGroup.add(group);
+  clickable.push(sphere);
+  meshById.set(d.id, sphere);
+  labelById.set(d.id,label);
+}
+
+const routes = [
+  ['observatory','garden'],['observatory','forge'],['observatory','resolve'],
+  ['observatory','harbour'],['garden','forge'],['harbour','forge'],['harbour','resolve'],
+  ['archive','observatory'],['compost','observatory'],
+  ['garden','crossroads'],['resolve','crossroads'],['harbour','crossroads'],['forge','crossroads']
+];
+
+const routeGroup = new THREE.Group();
+scene.add(routeGroup);
+
+function posFor(id){
+  const d=nodeData.find(n=>n.id===id);
+  return new THREE.Vector3(...d.position);
+}
+
+function makeRouteCylinder(aId,bId,isCross){
+  const start = posFor(aId);
+  const end = posFor(bId);
+  const direction = new THREE.Vector3().subVectors(end,start);
+  const length = direction.length();
+  const midpoint = new THREE.Vector3().addVectors(start,end).multiplyScalar(.5);
+
+  const radius = isCross ? 1.75 : 1.15;
+  const geom = new THREE.CylinderGeometry(radius,radius,length,8,1,true);
+  const color = isCross ? 0x9bb9ff : 0x9aa6b5;
+  const mat = new THREE.MeshBasicMaterial({
+    color,
+    transparent:true,
+    opacity:isCross ? 0.72 : 0.34,
+    depthWrite:false
   });
 
-  const drawn=new Set();
-  nodes.forEach(n=>(n.deps||[]).forEach(dep=>{
-    const key=[n.id,dep].sort().join(':');if(drawn.has(key))return;drawn.add(key);
-    const p1=nodePoint(n);let p2=nodeMap[dep]?nodePoint(nodeMap[dep]):stationMap[dep]?pt(stationMap[dep].angle,stationMap[dep].radius-52):null;if(!p2)return;
-    const isCross=n.id==='visibility'||dep==='visibility';
-    stage.appendChild(E('path',{d:pathArc(p1,p2,isCross?(emphasizeCross?56:42):24),fill:'none',stroke:isCross?'rgba(141,174,240,'+(emphasizeCross?'.98':'.74')+')':'rgba(255,255,255,.20)','stroke-width':isCross?(emphasizeCross?'3.8':'2.4'):'1.6','stroke-dasharray':isCross?'0':'4 6','stroke-linecap':'round'}))
-  }));
-
-  nodes.forEach(n=>{
-    const p=nodePoint(n),g=E('g',{style:'cursor:pointer','data-node':n.id});
-    g.appendChild(E('circle',{cx:p.x,cy:p.y,r:24,fill:n.color,opacity:n.station==='crossroads'?'.18':'.10'}));
-    g.appendChild(E('circle',{cx:p.x,cy:p.y,r:13,fill:n.color,stroke:'#0b0f14','stroke-width':'2',filter:n.station==='crossroads'?'url(#glow)':''}));
-    g.appendChild(E('rect',{x:p.x-58,y:p.y-36,width:116,height:20,rx:10,fill:'rgba(8,11,15,.78)',stroke:'rgba(255,255,255,.05)'}));
-    const label=E('text',{x:p.x,y:p.y-22,'text-anchor':'middle','font-family':'Inter,sans-serif','font-size':'10.2',fill:'#ece7dc'});label.textContent=labelShort(n.label,17);g.appendChild(label);
-    stage.appendChild(g)
-  })
+  const mesh = new THREE.Mesh(geom,mat);
+  mesh.position.copy(midpoint);
+  mesh.quaternion.setFromUnitVectors(
+    new THREE.Vector3(0,1,0),
+    direction.clone().normalize()
+  );
+  mesh.userData = {
+    cross:isCross,
+    baseOpacity:isCross ? 0.72 : 0.34
+  };
+  return mesh;
 }
 
-function stationContents(stId){ return nodes.filter(n=>n.station===stId) }
-
-function showStation(st){
-  const items=stationContents(st.id);
-  const hi=items.filter(i=>i.priority==='high').length,med=items.filter(i=>i.priority==='medium').length,lo=items.filter(i=>i.priority==='low').length;
-  detail.className='';
-  detail.innerHTML=`
-    <h3>${st.label}</h3>
-    <div class="badge" style="color:${st.color}">station</div>
-    <div class="detail-text"><strong>What it is:</strong> ${st.what}</div>
-    <div class="detail-text"><strong>Status:</strong> ${st.why}</div>
-    <div class="grid">
-      <div class="metric"><b>${st.time}</b><span>time horizon</span></div>
-      <div class="metric"><b style="color:${st.priority==='high'?'var(--high)':st.priority==='medium'?'var(--medium)':'var(--low)'}">${st.priority}</b><span>station priority</span></div>
-      <div class="metric"><b>${items.length}</b><span>current items</span></div>
-      <div class="metric"><b>${hi}/${med}/${lo}</b><span>high / med / low</span></div>
-    </div>
-    <h3 style="font-size:1rem;margin:12px 0 8px">What sits here</h3>
-    <div class="station-list">
-      ${items.length?items.map(i=>`<div class="station-item" style="cursor:pointer" data-node="${i.id}">
-        <strong>${i.label}</strong>
-        <span>${i.priority} priority · ${i.time} · ${i.status}</span>
-      </div>`).join(''):'<div class="empty">No active items.</div>'}
-    </div>
-    <div class="route-state"><strong>Routes:</strong> ${st.routes.join(' · ')}</div>
-    <div class="action"><h4>Station status</h4><ul>${st.next.map(x=>`<li>${x}</li>`).join('')}</ul></div>
-  `;
-  detail.querySelectorAll('[data-node]').forEach(el=>el.addEventListener('click',()=>showNode(nodeMap[el.dataset.node])));
+for(const [a,b] of routes){
+  const isCross = a==='crossroads' || b==='crossroads';
+  routeGroup.add(makeRouteCylinder(a,b,isCross));
 }
 
-function showNode(n){
-  const deps=(n.deps||[]).map(id=>nodeMap[id]?.label||stationMap[id]?.label||id);
-  const station=n.station==='crossroads'?{label:'Crossroads',color:'#8daef0'}:stationMap[n.station];
-  detail.className='';
-  detail.innerHTML=`
-    <h3>${n.label}</h3>
-    <div class="badge" style="color:${station.color}">${station.label}</div>
-    <div class="detail-text"><strong>What it is:</strong> ${n.what}</div>
-    <div class="detail-text"><strong>Status:</strong> ${n.status}</div>
-    <div class="detail-text"><strong>Why it matters:</strong> ${n.importance}</div>
-    <div class="grid">
-      <div class="metric"><b>${station.label}</b><span>where it sits</span></div>
-      <div class="metric"><b>${n.time}</b><span>time horizon</span></div>
-      <div class="metric"><b style="color:${n.priority==='high'?'var(--high)':n.priority==='medium'?'var(--medium)':'var(--low)'}">${n.priority}</b><span>priority</span></div>
-      <div class="metric"><b>${deps.length}</b><span>dependencies</span></div>
-    </div>
-    <h3 style="font-size:1rem;margin:12px 0 8px">Interdependencies</h3>
-    <ul class="dep-list">${deps.length?deps.map(d=>`<li>${d}</li>`).join(''):'<li>None currently.</li>'}</ul>
-    <h3 style="font-size:1rem;margin:12px 0 8px">Next movement</h3>
-    <ul class="dep-list">${n.next.map(x=>`<li>${x}</li>`).join('')}</ul>
-    ${n.actions.length?`<div class="action"><h4>${n.station==='forge'?'Critical delivery points':n.station==='resolve'?'Repair steps':'Actions'}</h4><ul>${n.actions.map(a=>`<li>${a}</li>`).join('')}</ul></div>`:''}
-  `;
+
+// faint field rings in major planes
+function ring(rotation,color,opacity=.08){
+  const geom=new THREE.RingGeometry(275,276.3,128);
+  const mat=new THREE.MeshBasicMaterial({color,transparent:true,opacity,side:THREE.DoubleSide,depthWrite:false});
+  const mesh=new THREE.Mesh(geom,mat);
+  mesh.rotation.set(...rotation);
+  return mesh;
 }
+scene.add(ring([Math.PI/2,0,0],0xffffff,.075)); // XZ
+scene.add(ring([0,Math.PI/2,0],0xffffff,.055)); // YZ
+scene.add(ring([0,0,0],0xffffff,.055)); // XY
 
-function showCrossroads(){
-  emphasizeCross=true;crossBtn.textContent='Normal Crossroads';render();
-  const vis=nodeMap['visibility'], forge=nodeMap['website'], garden=nodeMap['game'], threat=nodeMap['bullying'];
-  detail.className='';
-  detail.innerHTML=`
-    <h3>Crossroads</h3>
-    <div class="badge" style="color:#8daef0">connection analysis</div>
-    <div class="cross-card">
-      <strong>Active connection</strong>
-      <div class="detail-text" style="margin-top:8px">
-        ${threat.label} ↔ ${garden.label} ↔ ${vis.label}
-      </div>
-      <div class="detail-text">
-        The system detects a shared structure around visibility. One node describes visibility as threat.
-        Another describes authorship as a way to choose the terms of visibility.
-      </div>
-    </div>
-    <div class="detail-text"><strong>What may transform:</strong> unwanted visibility can become chosen visibility.</div>
-    <div class="detail-text"><strong>Why it matters:</strong> this is not merely a link between topics. It may change the meaning of a social fear through creation and authorship.</div>
-    <div class="grid">
-      <div class="metric"><b>3</b><span>linked nodes</span></div>
-      <div class="metric"><b>medium</b><span>priority</span></div>
-      <div class="metric"><b>this week</b><span>time horizon</span></div>
-      <div class="metric"><b>Forge</b><span>action destination</span></div>
-    </div>
-    <h3 style="font-size:1rem;margin:12px 0 8px">Connection with Forge</h3>
-    <div class="route-state">
-      Garden produces the game idea. Crossroads reframes visibility. Forge gives that transformation a public form through <strong>${forge.label}</strong>.
-    </div>
-    <div class="action">
-      <h4>Forge implication</h4>
-      <ul>
-        <li>Publish one small piece of authorship.</li>
-        <li>Make recognition optional and controlled, not compulsory.</li>
-        <li>Observe whether chosen visibility reduces the pull of threat-based visibility.</li>
-      </ul>
-    </div>
-  `;
+// sparse stars / field particles
+const starCount=520;
+const starPositions=new Float32Array(starCount*3);
+for(let i=0;i<starCount;i++){
+  const r=420+Math.random()*650;
+  const theta=Math.random()*Math.PI*2;
+  const phi=Math.acos(2*Math.random()-1);
+  starPositions[i*3]=r*Math.sin(phi)*Math.cos(theta);
+  starPositions[i*3+1]=r*Math.cos(phi);
+  starPositions[i*3+2]=r*Math.sin(phi)*Math.sin(theta);
 }
+const starGeo=new THREE.BufferGeometry();
+starGeo.setAttribute('position',new THREE.BufferAttribute(starPositions,3));
+const starMat=new THREE.PointsMaterial({color:0xb8c0cc,size:1.6,transparent:true,opacity:.42,sizeAttenuation:true});
+scene.add(new THREE.Points(starGeo,starMat));
 
-function angleFromPoint(x,y){return Math.atan2(y-C.y,x-C.x)*180/Math.PI}
+const raycaster = new THREE.Raycaster();
+const pointer = new THREE.Vector2();
+let pointerDown = null;
+let selected = null;
+let crossroadsMode = false;
+let routesMode = false;
 
-let pointerStartX=0, pointerStartY=0, moved=false, pointerTarget=null;
-const DRAG_THRESHOLD=8;
-
-viewport.addEventListener('pointerdown',e=>{
-  dragging=true;
-  moved=false;
-  pointerStartX=e.clientX;
-  pointerStartY=e.clientY;
-  pointerTarget=e.target;
-  const r=viewport.getBoundingClientRect(),
-        sx=(e.clientX-r.left)/r.width*1000,
-        sy=(e.clientY-r.top)/r.height*1000;
-  lastAngle=angleFromPoint(sx,sy);
-  viewport.setPointerCapture?.(e.pointerId);
+renderer.domElement.addEventListener('pointerdown',e=>{
+  pointerDown={x:e.clientX,y:e.clientY};
 });
 
-viewport.addEventListener('pointermove',e=>{
-  if(!dragging)return;
-  const dist=Math.hypot(e.clientX-pointerStartX,e.clientY-pointerStartY);
-  if(dist<DRAG_THRESHOLD && !moved) return;
-  moved=true;
-  viewport.classList.add('dragging');
+renderer.domElement.addEventListener('pointerup',e=>{
+  if(!pointerDown) return;
+  const moved=Math.hypot(e.clientX-pointerDown.x,e.clientY-pointerDown.y);
+  pointerDown=null;
+  if(moved>5) return;
 
-  const r=viewport.getBoundingClientRect(),
-        sx=(e.clientX-r.left)/r.width*1000,
-        sy=(e.clientY-r.top)/r.height*1000;
-  const a=angleFromPoint(sx,sy);
-  let delta=a-lastAngle;
-  if(delta>180) delta-=360;
-  if(delta<-180) delta+=360;
-  angleOffset+=delta;
-  lastAngle=a;
-  render();
-});
-
-viewport.addEventListener('pointerup',e=>{
-  const wasMoved=moved;
-  dragging=false;
-  viewport.classList.remove('dragging');
-
-  if(!wasMoved){
-    const target=document.elementFromPoint(e.clientX,e.clientY);
-    const nodeEl=target?.closest?.('[data-node]');
-    const stationEl=target?.closest?.('[data-station]');
-    const crossEl=target?.closest?.('[data-crossroads]');
-
-    if(nodeEl && nodeMap[nodeEl.dataset.node]){
-      showNode(nodeMap[nodeEl.dataset.node]);
-    } else if(stationEl && stationMap[stationEl.dataset.station]){
-      showStation(stationMap[stationEl.dataset.station]);
-    } else if(crossEl){
-      showCrossroads();
-    }
+  const rect=renderer.domElement.getBoundingClientRect();
+  pointer.x=((e.clientX-rect.left)/rect.width)*2-1;
+  pointer.y=-((e.clientY-rect.top)/rect.height)*2+1;
+  raycaster.setFromCamera(pointer,camera);
+  const hits=raycaster.intersectObjects(clickable,false);
+  if(hits.length){
+    selectNode(hits[0].object.userData);
   }
 });
 
-viewport.addEventListener('pointercancel',()=>{
-  dragging=false;
-  moved=false;
-  viewport.classList.remove('dragging');
+function selectNode(d){
+  crossroadsMode = d.id==='crossroads';
+  for(const mesh of clickable){
+    mesh.scale.setScalar(mesh.userData.id===d.id ? 1.22 : 1);
+  }
+  for(const route of routeGroup.children){
+    if(crossroadsMode){
+      route.material.opacity = route.userData.cross ? 1.0 : 0.13;
+      route.scale.x = route.scale.z = route.userData.cross ? 1.7 : 1.0;
+    }else if(routesMode){
+      route.material.opacity = route.userData.cross ? 0.98 : 0.82;
+      route.scale.x = route.scale.z = route.userData.cross ? 1.45 : 1.3;
+    }else{
+      route.material.opacity = route.userData.baseOpacity;
+      route.scale.x = route.scale.z = 1.0;
+    }
+  }
+  selected=d;
+  renderInspector(d);
+}
+
+function pColor(priority){
+  if(priority==='high') return '#ef766a';
+  if(priority==='medium') return '#f2a65a';
+  return '#8fd0a6';
+}
+
+function renderInspector(d){
+  const coords=d.position.join(', ');
+  inspector.className='';
+  inspector.innerHTML=`
+    <h3>${d.label}</h3>
+    <div class="badge" style="color:#${d.color.toString(16).padStart(6,'0')}">${d.type}</div>
+    <div class="detail"><b>What it is:</b> ${d.description}</div>
+    <div class="detail"><b>Status:</b> ${d.status}</div>
+    <div class="detail"><b>Why it matters:</b> ${d.why}</div>
+
+    <div class="grid">
+      <div class="metric"><b>${d.region}</b><span>field region</span></div>
+      <div class="metric"><b>${d.time}</b><span>time horizon</span></div>
+      <div class="metric"><b style="color:${pColor(d.priority)}">${d.priority}</b><span>priority</span></div>
+      <div class="metric"><b>${coords}</b><span>X, Y, Z</span></div>
+    </div>
+
+    <h4 style="font-family:Inter,sans-serif;font-size:.9rem;margin:10px 0 6px">Interdependencies</h4>
+    <ul class="dep">${d.dependencies.map(x=>`<li>${x}</li>`).join('')}</ul>
+
+    <div class="actionbox">
+      <h4>Next movement</h4>
+      <ul>${d.next.map(x=>`<li>${x}</li>`).join('')}</ul>
+    </div>
+  `;
+}
+
+document.getElementById('routes').addEventListener('click',()=>{
+  routesMode = !routesMode;
+  crossroadsMode = false;
+  document.getElementById('routes').textContent = routesMode ? 'Normal routes' : 'Highlight routes';
+  document.getElementById('crossroads').textContent = 'Crossroads';
+
+  for(const mesh of clickable) mesh.scale.setScalar(1);
+
+  for(const route of routeGroup.children){
+    route.material.opacity = routesMode
+      ? (route.userData.cross ? 0.98 : 0.82)
+      : route.userData.baseOpacity;
+    route.scale.x = route.scale.z = routesMode
+      ? (route.userData.cross ? 1.45 : 1.3)
+      : 1.0;
+  }
+
+  inspector.className='';
+  inspector.innerHTML = `
+    <h3>Routes</h3>
+    <div class="badge" style="color:#9bb9ff">field relationships</div>
+    <div class="detail"><b>What you are seeing:</b> active dependencies and movements between parts of the field.</div>
+    <div class="detail">The brighter blue routes pass through Crossroads. The pale routes show direct dependencies between stations.</div>
+    <div class="actionbox">
+      <h4>Reading rule</h4>
+      <ul>
+        <li>Routes should explain structure, not decorate the field.</li>
+        <li>Rotate the field to separate overlapping relationships.</li>
+        <li>Select Crossroads when you want transformation rather than dependency.</li>
+      </ul>
+    </div>`;
 });
 
-resetBtn.addEventListener('click',()=>{angleOffset=0;emphasizeCross=false;showRoutes=true;crossBtn.textContent='Punch up Crossroads';routesBtn.textContent='Hide routes';render();showStation(stationMap['forge'])});
-crossBtn.addEventListener('click',()=>{emphasizeCross=!emphasizeCross;crossBtn.textContent=emphasizeCross?'Normal Crossroads':'Punch up Crossroads';render();if(emphasizeCross)showCrossroads();else showStation(stationMap['forge'])});
-routesBtn.addEventListener('click',()=>{showRoutes=!showRoutes;routesBtn.textContent=showRoutes?'Hide routes':'Show routes';render()});
+document.getElementById('crossroads').addEventListener('click',()=>{
+  routesMode = false;
+  document.getElementById('routes').textContent = 'Highlight routes';
+  selectNode(nodeData.find(d=>d.id==='crossroads'));
+  document.getElementById('crossroads').textContent = 'Crossroads active';
+  controls.target.set(0,0,0);
+  camera.position.set(410,250,520);
+  controls.update();
+});
 
-document.querySelectorAll('.tab').forEach(tab=>tab.addEventListener('click',()=>{
-  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
-  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
-  tab.classList.add('active');document.getElementById(tab.dataset.tab).classList.add('active')
-}));
+function setView(pos){
+  camera.position.set(...pos);
+  controls.target.set(0,0,0);
+  controls.update();
+}
+document.getElementById('front').addEventListener('click',()=>setView([0,80,760]));
+document.getElementById('top').addEventListener('click',()=>setView([0,760,120]));
+document.getElementById('side').addEventListener('click',()=>setView([760,90,0]));
+document.getElementById('reset').addEventListener('click',()=>{
+  routesMode = false;
+  crossroadsMode = false;
+  document.getElementById('routes').textContent = 'Highlight routes';
+  document.getElementById('crossroads').textContent = 'Crossroads';
+  setView([430,320,560]);
+  selectNode(nodeData.find(d=>d.id==='observatory'));
+});
 
-renderTasks();
-render();
-showStation(stationMap['forge']);
+function resize(){
+  const rect=mount.getBoundingClientRect();
+  renderer.setSize(rect.width,rect.height,false);
+  camera.aspect=rect.width/rect.height;
+  camera.updateProjectionMatrix();
+}
+window.addEventListener('resize',resize);
+resize();
+
+function animate(){
+  requestAnimationFrame(animate);
+  controls.update();
+
+  // Labels face the camera automatically as sprites.
+  // Subtle pulse only for Crossroads, enough to indicate intersection without becoming a nightclub.
+  const c=meshById.get('crossroads');
+  if(c && !crossroadsMode){
+    const pulse=1+Math.sin(performance.now()*0.0022)*0.035;
+    c.scale.setScalar(pulse);
+  }
+
+  renderer.render(scene,camera);
+}
+selectNode(nodeData.find(d=>d.id==='observatory'));
+animate();
 </script>
 </body>
 </html>
