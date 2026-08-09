@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Your Observatory</title>
+<style>
+:root{
+  --bg:#07090d; --panel:#10141b; --ink:#f4efe6; --muted:#a9a59b; --line:#29313b;
+  --forge:#d7a653; --garden:#7bbd73; --harbour:#6cc1de; --resolve:#d58a6c;
+  --observatory:#d9cfb5; --archive:#9182ab; --compost:#7e6c58; --crossroads:#8daef0;
+  --high:#f1a18e; --medium:#e0c98a; --low:#8fd0a6;
+}
+*{box-sizing:border-box}
+body{
+  margin:0;color:var(--ink);
+  font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;
+  background:
+    radial-gradient(circle at 20% 0%, rgba(141,174,240,.08), transparent 25%),
+    radial-gradient(circle at 80% 10%, rgba(217,207,181,.08), transparent 22%),var(--bg);
+}
+.wrap{max-width:1340px;margin:0 auto;padding:26px 18px 60px}
+.kicker{text-transform:uppercase;letter-spacing:.14em;color:var(--observatory);font-size:.75rem;margin-bottom:8px}
+h1,h2,h3,h4{font-family:Georgia,"Times New Roman",serif;font-weight:500;letter-spacing:-.02em;margin:0}
+h1{font-size:clamp(2.7rem,6.8vw,5.4rem);line-height:.96;margin-bottom:12px}
+.lead{max-width:980px;color:#d4cfc4;line-height:1.68;font-size:1.05rem;margin:0 0 22px}
+.layout{display:grid;grid-template-columns:minmax(320px,1.35fr) minmax(320px,.75fr);gap:18px;align-items:start}
+.card{
+  border:1px solid var(--line);background:linear-gradient(180deg,rgba(255,255,255,.025),rgba(255,255,255,.012));
+  border-radius:24px;padding:16px
+}
+.system-head{display:flex;justify-content:space-between;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:12px}
+.controls{display:flex;gap:8px;flex-wrap:wrap}
+button{
+  appearance:none;border:1px solid var(--line);background:#10161e;color:var(--ink);
+  padding:9px 13px;border-radius:999px;cursor:pointer;font:inherit
+}
+button:hover{border-color:#465364}
+.tabbar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+.tab{border:1px solid var(--line);background:#0f151c;color:var(--muted);border-radius:999px;padding:9px 13px;cursor:pointer;font-size:.92rem}
+.tab.active{color:var(--ink);border-color:#5a6675;background:#131a22}
+.view{display:none}.view.active{display:block}
+.viewport{
+  position:relative;width:100%;aspect-ratio:1/1;border-radius:26px;overflow:hidden;
+  border:1px solid rgba(255,255,255,.055);
+  background:radial-gradient(circle at 50% 50%,rgba(23,29,39,.92),rgba(8,10,14,.99) 70%);
+  cursor:grab;touch-action:none
+}
+.viewport.dragging{cursor:grabbing}
+svg{display:block;width:100%;height:100%}
+.legend{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.legend span{border:1px solid var(--line);border-radius:999px;padding:7px 10px;color:var(--muted);font-size:.78rem}
+.note{margin-top:14px;color:var(--muted);font-size:.9rem;line-height:1.6}
+.side{display:grid;gap:16px;position:sticky;top:18px}
+.section-title{font-size:1.4rem;margin:0 0 8px}
+.empty{color:var(--muted);line-height:1.62}
+.badge{display:inline-block;border:1px solid var(--line);padding:5px 9px;border-radius:999px;font-size:.73rem;letter-spacing:.08em;text-transform:uppercase;margin:4px 0 10px}
+.detail-text{color:#d8d3c8;line-height:1.6;margin-bottom:12px}
+.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin:10px 0 14px}
+.metric{border:1px solid var(--line);background:rgba(255,255,255,.02);border-radius:14px;padding:10px 8px}
+.metric b{display:block;font-size:1rem}.metric span{display:block;color:var(--muted);font-size:.74rem;margin-top:4px}
+.dep-list{padding-left:18px;color:#d5d0c6;line-height:1.58;margin:8px 0}
+.action{
+  border:1px solid rgba(241,211,156,.25);background:rgba(241,211,156,.06);
+  border-radius:16px;padding:12px 12px;margin-top:12px
+}
+.action h4{margin:0 0 8px;font-size:1rem;font-family:Inter,sans-serif}
+.action ul{margin:0;padding-left:18px;color:#e2dccf;line-height:1.55}
+.small{color:var(--muted);font-size:.88rem;line-height:1.58}
+.task-board{display:grid;gap:12px}
+.task{border:1px solid var(--line);background:rgba(255,255,255,.015);border-radius:18px;padding:14px}
+.task-title{font-size:1.08rem;font-family:Georgia,serif}
+.task-meta{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0}
+.pill{border:1px solid var(--line);padding:5px 8px;border-radius:999px;color:var(--muted);font-size:.76rem}
+.priority-high{color:var(--high);border-color:rgba(241,161,142,.35)}
+.priority-medium{color:var(--medium);border-color:rgba(224,201,138,.35)}
+.priority-low{color:var(--low);border-color:rgba(143,208,166,.35)}
+.deadline{color:#f1d39c;border-color:rgba(241,211,156,.35)}
+.route-state{border:1px solid rgba(255,255,255,.06);background:rgba(255,255,255,.02);padding:12px;border-radius:16px;margin-top:10px}
+.station-list{display:grid;gap:8px;margin-top:10px}
+.station-item{
+  border:1px solid var(--line);background:rgba(255,255,255,.015);border-radius:14px;padding:10px
+}
+.station-item strong{display:block;margin-bottom:3px}
+.station-item span{color:var(--muted);font-size:.82rem}
+.cross-card{
+  border:1px solid rgba(141,174,240,.28);background:rgba(141,174,240,.06);
+  border-radius:16px;padding:12px;margin-top:10px
+}
+@media(max-width:960px){.layout{grid-template-columns:1fr}.side{position:static}}
+</style>
+</head>
+<body>
+<div style="max-width:1340px;margin:0 auto;padding:16px 18px 0;display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap">
+  <a href="index.html" style="color:#f4efe6;text-decoration:none;font-weight:700;letter-spacing:.08em;text-transform:uppercase;font-size:.78rem">The Observatory</a>
+  <div style="display:flex;gap:8px">
+    <a href="app.html" style="color:#f4efe6;text-decoration:none;border:1px solid #29313b;padding:8px 12px;border-radius:999px;font-size:.85rem">System field</a>
+    <a href="today.html" style="color:#a9a59b;text-decoration:none;border:1px solid #29313b;padding:8px 12px;border-radius:999px;font-size:.85rem">Today</a>
+  </div>
+</div>
+<div class="wrap">
+  <div class="kicker">Your Observatory</div>
+  <h1>Operational inspector wired in.</h1>
+  <p class="lead">
+    Every station and node now drives the panel on the right. Stations show what they contain and a brief status report.
+    Nodes show position, priority, time horizon, dependencies, and next movement.
+    Crossroads can take over the inspector with a dedicated connection analysis and a Forge implication.
+  </p>
+
+  <div class="layout">
+    <section class="card">
+      <div class="system-head">
+        <div>
+          <h2 class="section-title">System field</h2>
+          <div class="small">Drag to rotate. Release to park. Click anything to inspect.</div>
+        </div>
+        <div class="controls">
+          <button id="resetBtn">Reset view</button>
+          <button id="crossBtn">Punch up Crossroads</button>
+          <button id="routesBtn">Hide routes</button>
+        </div>
+      </div>
+
+      <div class="tabbar">
+        <div class="tab active" data-tab="fieldView">System field</div>
+        <div class="tab" data-tab="tasksView">Daily tasks</div>
+      </div>
+
+      <div id="fieldView" class="view active">
+        <div class="viewport" id="viewport">
+          <svg id="stage" viewBox="0 0 1000 1000" aria-label="Rotational Observatory system"></svg>
+        </div>
+        <div class="legend">
+          <span>Click station = contents + status</span>
+          <span>Click node = issue snapshot</span>
+          <span>Bright paths = routes</span>
+          <span>Blue arcs = Crossroads</span>
+        </div>
+      </div>
+
+      <div id="tasksView" class="view">
+        <div class="task-board" id="taskBoard"></div>
+      </div>
+    </section>
+
+    <aside class="side">
+      <section class="card">
+        <h2 class="section-title">Operational inspector</h2>
+        <div id="detail" class="empty">
+          Select a station or node. The panel will refresh immediately.
+        </div>
+      </section>
+
+      <section class="card">
+        <h2 class="section-title">Current logic</h2>
+        <div class="small">
+          <p><strong>Observatory</strong> diagnoses and routes.</p>
+          <p><strong>Garden</strong> grows what is alive.</p>
+          <p><strong>Forge</strong> makes and delivers.</p>
+          <p><strong>Harbour</strong> protects stability.</p>
+          <p><strong>Resolve</strong> repairs and returns.</p>
+          <p><strong>Archive / Compost</strong> retain and release.</p>
+          <p><strong>Crossroads</strong> reveals transformation between things.</p>
+        </div>
+      </section>
+    </aside>
+  </div>
+</div>
+
+<script>
+const stage = document.getElementById('stage');
+const viewport = document.getElementById('viewport');
+const detail = document.getElementById('detail');
+const resetBtn = document.getElementById('resetBtn');
+const crossBtn = document.getElementById('crossBtn');
+const routesBtn = document.getElementById('routesBtn');
+const taskBoard = document.getElementById('taskBoard');
+
+const C={x:500,y:500}, R=300;
+
+const stations=[
+{id:'observatory',label:'Observatory',color:'#d9cfb5',angle:-90,radius:R,type:'station',priority:'high',time:'today / ongoing',
+ what:'The perch and routing station.',why:'Used to diagnose the field, recognise patterns, and determine what gets promoted into motion.',
+ dependencies:['garden','forge','resolve','harbour'],routes:['Mostly to Garden','Often to Forge','Sometimes to Resolve','Receives from Harbour'],
+ next:['See before acting','Promote the right thing into motion']},
+{id:'garden',label:'Garden',color:'#7bbd73',angle:-20,radius:R,type:'station',priority:'medium',time:'this week',
+ what:'Live growth and protected development.',why:'Holds questions, early ideas, and material that is alive but not yet ready for pressure.',
+ dependencies:['observatory','forge','crossroads'],routes:['Receives from Observatory','Can promote to Forge','Feeds Crossroads'],
+ next:['Protect and tend','Promote one viable object']},
+{id:'forge',label:'Forge',color:'#d7a653',angle:35,radius:R,type:'station',priority:'high',time:'today',
+ what:'Making, delivery, publication and visible action.',why:'This is where the system becomes real in the world.',
+ dependencies:['garden','observatory','harbour'],routes:['Often receives from Garden','May receive from Observatory','Sometimes requires Harbour support'],
+ next:['Define next move','Deliver visible output']},
+{id:'resolve',label:'Resolve',color:'#d58a6c',angle:115,radius:R,type:'station',priority:'medium',time:'today / this week',
+ what:'Repair, truth, closure and return.',why:'Residue becomes less costly when one repairable thing is addressed.',
+ dependencies:['observatory','harbour'],routes:['Receives diagnosis from Observatory','May need Harbour support'],
+ next:['Repair one thing','Reduce residue']},
+{id:'archive',label:'Archive',color:'#9182ab',angle:185,radius:R,type:'station',priority:'low',time:'later',
+ what:'Retained memory without active obligation.',why:'Stores useful context without demanding present attention.',
+ dependencies:['observatory'],routes:['Below active circulation','Can occasionally feed Observatory'],next:['Retain without debt']},
+{id:'compost',label:'Compost',color:'#7e6c58',angle:235,radius:R,type:'station',priority:'low',time:'later',
+ what:'Release, decomposition and letting go.',why:'Allows dead obligations or beliefs to stop consuming the active field.',
+ dependencies:['observatory'],routes:['Below active circulation','May release pressure on the whole field'],next:['Let dead things die well']},
+{id:'harbour',label:'Harbour',color:'#6cc1de',angle:305,radius:R,type:'station',priority:'high',time:'today / ongoing',
+ what:'Protected stability conditions.',why:'The rest of the system becomes less inhabitable when Harbour is neglected.',
+ dependencies:['observatory','forge','resolve'],routes:['Can feed Observatory','Can support Forge','Can stabilise Resolve'],
+ next:['Protect baseline conditions','Support without justifying itself']}
+];
+
+const nodes=[
+{id:'website',label:'Website launch',station:'forge',orbit:.72,offset:-18,color:'#f1d39c',type:'node',priority:'high',time:'today',
+ what:'The first public surface of the work.',importance:'This converts possibility into visible reality.',why:'It is the action gateway for the whole system.',
+ deps:['game','observatory-note','sleep'],next:['Draft one public page','Place one real module','Publish live link tonight'],
+ actions:['Build landing shell','Attach one real object','Define done as “public and reachable”'],status:'In active delivery'},
+{id:'game',label:'Game idea',station:'garden',orbit:.72,offset:12,color:'#b7ddb0',type:'node',priority:'medium',time:'this week',
+ what:'A generative creative object.',importance:'It links identity, mastery and chosen visibility.',why:'Not just a hobby. It connects the creative and social system.',
+ deps:['visibility','website'],next:['Protect and shape the concept','Promote a small piece into Forge'],actions:['Play / test the core room','Note one improvement'],status:'Growing'},
+{id:'bullying',label:'Fear of being singled out',station:'observatory',orbit:.70,offset:-24,color:'#eadfcb',type:'node',priority:'high',time:'ongoing',
+ what:'A high-mass social concern.',importance:'Influences movement across the wider field.',why:'Needs observation and interpretation rather than automatic obedience.',
+ deps:['visibility'],next:['Observe trigger pattern','Reduce its jurisdiction over action'],actions:[],status:'High attention load'},
+{id:'visibility',label:'Chosen visibility',station:'crossroads',orbit:.38,offset:0,color:'#8daef0',type:'node',priority:'medium',time:'this week',
+ what:'A transformation node.',importance:'This is the crossroads where exposure changes meaning.',why:'It links being noticed as target to being noticed as author.',
+ deps:['bullying','game','masking'],next:['Make authorship safely visible'],actions:[],status:'Cross-domain hypothesis'},
+{id:'sleep',label:'Sleep',station:'harbour',orbit:.70,offset:-10,color:'#97d6ea',type:'node',priority:'high',time:'tonight',
+ what:'A baseline stabiliser.',importance:'It supports the whole field.',why:'Everything performs worse when this is neglected.',
+ deps:['website'],next:['Protect tonight’s sleep boundary'],actions:['Stop work by a set time'],status:'Must protect'},
+{id:'friend',label:'Reply to best friend',station:'resolve',orbit:.70,offset:10,color:'#e0aa94',type:'node',priority:'high',time:'today',
+ what:'A repairable relationship action.',importance:'A small honest move may stabilise the wider field.',why:'This is a clear residue reduction action.',
+ deps:[],next:['Send one honest message today'],actions:['Choose the one message','State truth simply','Do not overperform remorse'],status:'Open repair'},
+{id:'masking',label:'Act normal enough',station:'compost',orbit:.72,offset:8,color:'#ab9a87',type:'node',priority:'low',time:'later',
+ what:'A belief candidate for release.',importance:'May no longer deserve sovereignty over the present.',why:'A survival belief that may be outliving its usefulness.',
+ deps:['visibility'],next:['Test whether authorship can replace camouflage'],actions:[],status:'Candidate for release'},
+{id:'oldwork',label:'Old assignments',station:'archive',orbit:.72,offset:-8,color:'#b5a9c8',type:'node',priority:'low',time:'later',
+ what:'Dormant school residue.',importance:'Context, not command.',why:'Retained for reference rather than active guilt.',
+ deps:[],next:['Retain as context only'],actions:[],status:'Dormant'},
+{id:'observatory-note',label:'Observatory note',station:'observatory',orbit:.50,offset:18,color:'#efe5cb',type:'node',priority:'medium',time:'today',
+ what:'A synthesis note.',importance:'Turns diagnosis into routing.',why:'This is where recognition becomes decision.',
+ deps:['game','website','friend','sleep'],next:['Promote what is ready','Protect what must remain held'],actions:[],status:'Routing note'}
+];
+
+const dailyTasks=[
+{title:'Reply to that friend',station:'resolve',priority:'high',due:'Tonight',note:'One honest message. Keep it simple.'},
+{title:'Write the public page',station:'forge',priority:'high',due:'Tonight',note:'Landing shell + one real object.'},
+{title:'Play / test the game room',station:'garden',priority:'medium',due:'Today',note:'Check the core experience and note one improvement.'},
+{title:'Protect sleep',station:'harbour',priority:'high',due:'Tonight',note:'Stop work by a set time so Harbour is not sacrificed to Forge.'}
+];
+
+const nodeMap=Object.fromEntries(nodes.map(n=>[n.id,n]));
+const stationMap=Object.fromEntries(stations.map(s=>[s.id,s]));
+const stationRoutes=[['observatory','garden'],['observatory','forge'],['observatory','resolve'],['garden','forge'],['harbour','observatory'],['harbour','forge'],['harbour','resolve'],['archive','observatory'],['compost','observatory']];
+
+let angleOffset=0,dragging=false,lastAngle=0,emphasizeCross=false,showRoutes=true;
+
+function priorityClass(p){return p==='high'?'priority-high':p==='medium'?'priority-medium':'priority-low'}
+function renderTasks(){
+  taskBoard.innerHTML=dailyTasks.map(t=>`
+    <div class="task">
+      <div class="task-title">${t.title}</div>
+      <div class="task-meta">
+        <span class="pill ${priorityClass(t.priority)}">${t.priority} priority</span>
+        <span class="pill">${stationMap[t.station].label}</span>
+        <span class="pill deadline">deadline ${t.due.toLowerCase()}</span>
+      </div>
+      <div class="detail-text">${t.note}</div>
+    </div>`).join('');
+}
+function pt(angleDeg,radius){
+  const a=(angleDeg+angleOffset)*Math.PI/180;
+  return {x:C.x+Math.cos(a)*radius,y:C.y+Math.sin(a)*radius}
+}
+function nodePoint(node){
+  if(node.station==='crossroads') return {x:C.x,y:C.y-6};
+  const s=stationMap[node.station], base=pt(s.angle,s.radius*node.orbit), a=(s.angle+angleOffset)*Math.PI/180;
+  const tangent={x:-Math.sin(a),y:Math.cos(a)};
+  return {x:base.x+tangent.x*node.offset,y:base.y+tangent.y*node.offset}
+}
+function pathArc(p1,p2,bend=34){
+  const mx=(p1.x+p2.x)/2,my=(p1.y+p2.y)/2,dx=p2.x-p1.x,dy=p2.y-p1.y,len=Math.hypot(dx,dy)||1;
+  const nx=-dy/len,ny=dx/len;return `M ${p1.x} ${p1.y} Q ${mx+nx*bend} ${my+ny*bend} ${p2.x} ${p2.y}`
+}
+function E(tag,attrs={}){
+  const el=document.createElementNS('http://www.w3.org/2000/svg',tag);
+  Object.entries(attrs).forEach(([k,v])=>el.setAttribute(k,v));return el
+}
+function labelShort(txt,n=16){return txt.length>n?txt.slice(0,n-1)+'…':txt}
+
+function render(){
+  stage.innerHTML='';
+  const defs=E('defs'),glow=E('filter',{id:'glow'});
+  glow.appendChild(E('feGaussianBlur',{stdDeviation:'4',result:'blur'}));
+  const merge=E('feMerge');merge.appendChild(E('feMergeNode',{in:'blur'}));merge.appendChild(E('feMergeNode',{in:'SourceGraphic'}));glow.appendChild(merge);defs.appendChild(glow);stage.appendChild(defs);
+
+  stage.appendChild(E('circle',{cx:C.x,cy:C.y,r:348,fill:'none',stroke:'rgba(255,255,255,.055)','stroke-width':'1.2'}));
+  stage.appendChild(E('circle',{cx:C.x,cy:C.y,r:232,fill:'none',stroke:'rgba(255,255,255,.03)','stroke-width':'1'}));
+  stage.appendChild(E('circle',{cx:C.x,cy:C.y,r:125,fill:'none',stroke:'rgba(255,255,255,.025)','stroke-width':'1'}));
+
+  if(showRoutes){
+    stationRoutes.forEach(([a,b])=>{
+      const p1=pt(stationMap[a].angle,stationMap[a].radius-34),p2=pt(stationMap[b].angle,stationMap[b].radius-34);
+      stage.appendChild(E('path',{d:pathArc(p1,p2,26),fill:'none',stroke:'rgba(255,255,255,.18)','stroke-width':'2.2','stroke-linecap':'round',filter:'url(#glow)'}));
+    })
+  }
+
+  const crossRing=E('circle',{cx:C.x,cy:C.y,r:92,fill:'rgba(141,174,240,.07)',stroke:'rgba(141,174,240,'+(emphasizeCross?'.95':'.45')+')','stroke-width':emphasizeCross?'3':'1.8',style:'cursor:pointer','data-crossroads':'1'});
+  
+  stage.appendChild(crossRing);
+
+  const crossTxt=E('text',{x:C.x,y:C.y+5,'text-anchor':'middle','font-family':'Inter,sans-serif','font-size':'12','letter-spacing':'1.8',fill:'#8daef0',style:'cursor:pointer','data-crossroads':'1'});
+  crossTxt.textContent='CROSSROADS';stage.appendChild(crossTxt);
+
+  stage.appendChild(E('circle',{cx:C.x,cy:C.y,r:36,fill:'rgba(12,16,22,.96)',stroke:'rgba(255,255,255,.14)','stroke-width':'1.5'}));
+  const self=E('text',{x:C.x,y:C.y+4,'text-anchor':'middle','font-family':'Georgia,serif','font-size':'16',fill:'#f4efe6'});self.textContent='SELF';stage.appendChild(self);
+
+  stations.forEach(st=>{
+    const p=pt(st.angle,st.radius),g=E('g',{style:'cursor:pointer','data-station':st.id});
+    [E('circle',{cx:p.x,cy:p.y,r:74,fill:st.color,opacity:'.08'}),E('circle',{cx:p.x,cy:p.y,r:54,fill:st.color,opacity:'.18',stroke:st.color,'stroke-width':'2.4'}),E('circle',{cx:p.x,cy:p.y,r:40,fill:'rgba(12,15,20,.85)',stroke:'rgba(255,255,255,.07)'})].forEach(x=>g.appendChild(x));
+    const label=E('text',{x:p.x,y:p.y+4,'text-anchor':'middle','font-family':'Inter,sans-serif','font-size':'11.5','letter-spacing':'1.3',fill:st.color});label.textContent=st.label.toUpperCase();g.appendChild(label);
+    stage.appendChild(g)
+  });
+
+  const drawn=new Set();
+  nodes.forEach(n=>(n.deps||[]).forEach(dep=>{
+    const key=[n.id,dep].sort().join(':');if(drawn.has(key))return;drawn.add(key);
+    const p1=nodePoint(n);let p2=nodeMap[dep]?nodePoint(nodeMap[dep]):stationMap[dep]?pt(stationMap[dep].angle,stationMap[dep].radius-52):null;if(!p2)return;
+    const isCross=n.id==='visibility'||dep==='visibility';
+    stage.appendChild(E('path',{d:pathArc(p1,p2,isCross?(emphasizeCross?56:42):24),fill:'none',stroke:isCross?'rgba(141,174,240,'+(emphasizeCross?'.98':'.74')+')':'rgba(255,255,255,.20)','stroke-width':isCross?(emphasizeCross?'3.8':'2.4'):'1.6','stroke-dasharray':isCross?'0':'4 6','stroke-linecap':'round'}))
+  }));
+
+  nodes.forEach(n=>{
+    const p=nodePoint(n),g=E('g',{style:'cursor:pointer','data-node':n.id});
+    g.appendChild(E('circle',{cx:p.x,cy:p.y,r:24,fill:n.color,opacity:n.station==='crossroads'?'.18':'.10'}));
+    g.appendChild(E('circle',{cx:p.x,cy:p.y,r:13,fill:n.color,stroke:'#0b0f14','stroke-width':'2',filter:n.station==='crossroads'?'url(#glow)':''}));
+    g.appendChild(E('rect',{x:p.x-58,y:p.y-36,width:116,height:20,rx:10,fill:'rgba(8,11,15,.78)',stroke:'rgba(255,255,255,.05)'}));
+    const label=E('text',{x:p.x,y:p.y-22,'text-anchor':'middle','font-family':'Inter,sans-serif','font-size':'10.2',fill:'#ece7dc'});label.textContent=labelShort(n.label,17);g.appendChild(label);
+    stage.appendChild(g)
+  })
+}
+
+function stationContents(stId){ return nodes.filter(n=>n.station===stId) }
+
+function showStation(st){
+  const items=stationContents(st.id);
+  const hi=items.filter(i=>i.priority==='high').length,med=items.filter(i=>i.priority==='medium').length,lo=items.filter(i=>i.priority==='low').length;
+  detail.className='';
+  detail.innerHTML=`
+    <h3>${st.label}</h3>
+    <div class="badge" style="color:${st.color}">station</div>
+    <div class="detail-text"><strong>What it is:</strong> ${st.what}</div>
+    <div class="detail-text"><strong>Status:</strong> ${st.why}</div>
+    <div class="grid">
+      <div class="metric"><b>${st.time}</b><span>time horizon</span></div>
+      <div class="metric"><b style="color:${st.priority==='high'?'var(--high)':st.priority==='medium'?'var(--medium)':'var(--low)'}">${st.priority}</b><span>station priority</span></div>
+      <div class="metric"><b>${items.length}</b><span>current items</span></div>
+      <div class="metric"><b>${hi}/${med}/${lo}</b><span>high / med / low</span></div>
+    </div>
+    <h3 style="font-size:1rem;margin:12px 0 8px">What sits here</h3>
+    <div class="station-list">
+      ${items.length?items.map(i=>`<div class="station-item" style="cursor:pointer" data-node="${i.id}">
+        <strong>${i.label}</strong>
+        <span>${i.priority} priority · ${i.time} · ${i.status}</span>
+      </div>`).join(''):'<div class="empty">No active items.</div>'}
+    </div>
+    <div class="route-state"><strong>Routes:</strong> ${st.routes.join(' · ')}</div>
+    <div class="action"><h4>Station status</h4><ul>${st.next.map(x=>`<li>${x}</li>`).join('')}</ul></div>
+  `;
+  detail.querySelectorAll('[data-node]').forEach(el=>el.addEventListener('click',()=>showNode(nodeMap[el.dataset.node])));
+}
+
+function showNode(n){
+  const deps=(n.deps||[]).map(id=>nodeMap[id]?.label||stationMap[id]?.label||id);
+  const station=n.station==='crossroads'?{label:'Crossroads',color:'#8daef0'}:stationMap[n.station];
+  detail.className='';
+  detail.innerHTML=`
+    <h3>${n.label}</h3>
+    <div class="badge" style="color:${station.color}">${station.label}</div>
+    <div class="detail-text"><strong>What it is:</strong> ${n.what}</div>
+    <div class="detail-text"><strong>Status:</strong> ${n.status}</div>
+    <div class="detail-text"><strong>Why it matters:</strong> ${n.importance}</div>
+    <div class="grid">
+      <div class="metric"><b>${station.label}</b><span>where it sits</span></div>
+      <div class="metric"><b>${n.time}</b><span>time horizon</span></div>
+      <div class="metric"><b style="color:${n.priority==='high'?'var(--high)':n.priority==='medium'?'var(--medium)':'var(--low)'}">${n.priority}</b><span>priority</span></div>
+      <div class="metric"><b>${deps.length}</b><span>dependencies</span></div>
+    </div>
+    <h3 style="font-size:1rem;margin:12px 0 8px">Interdependencies</h3>
+    <ul class="dep-list">${deps.length?deps.map(d=>`<li>${d}</li>`).join(''):'<li>None currently.</li>'}</ul>
+    <h3 style="font-size:1rem;margin:12px 0 8px">Next movement</h3>
+    <ul class="dep-list">${n.next.map(x=>`<li>${x}</li>`).join('')}</ul>
+    ${n.actions.length?`<div class="action"><h4>${n.station==='forge'?'Critical delivery points':n.station==='resolve'?'Repair steps':'Actions'}</h4><ul>${n.actions.map(a=>`<li>${a}</li>`).join('')}</ul></div>`:''}
+  `;
+}
+
+function showCrossroads(){
+  emphasizeCross=true;crossBtn.textContent='Normal Crossroads';render();
+  const vis=nodeMap['visibility'], forge=nodeMap['website'], garden=nodeMap['game'], threat=nodeMap['bullying'];
+  detail.className='';
+  detail.innerHTML=`
+    <h3>Crossroads</h3>
+    <div class="badge" style="color:#8daef0">connection analysis</div>
+    <div class="cross-card">
+      <strong>Active connection</strong>
+      <div class="detail-text" style="margin-top:8px">
+        ${threat.label} ↔ ${garden.label} ↔ ${vis.label}
+      </div>
+      <div class="detail-text">
+        The system detects a shared structure around visibility. One node describes visibility as threat.
+        Another describes authorship as a way to choose the terms of visibility.
+      </div>
+    </div>
+    <div class="detail-text"><strong>What may transform:</strong> unwanted visibility can become chosen visibility.</div>
+    <div class="detail-text"><strong>Why it matters:</strong> this is not merely a link between topics. It may change the meaning of a social fear through creation and authorship.</div>
+    <div class="grid">
+      <div class="metric"><b>3</b><span>linked nodes</span></div>
+      <div class="metric"><b>medium</b><span>priority</span></div>
+      <div class="metric"><b>this week</b><span>time horizon</span></div>
+      <div class="metric"><b>Forge</b><span>action destination</span></div>
+    </div>
+    <h3 style="font-size:1rem;margin:12px 0 8px">Connection with Forge</h3>
+    <div class="route-state">
+      Garden produces the game idea. Crossroads reframes visibility. Forge gives that transformation a public form through <strong>${forge.label}</strong>.
+    </div>
+    <div class="action">
+      <h4>Forge implication</h4>
+      <ul>
+        <li>Publish one small piece of authorship.</li>
+        <li>Make recognition optional and controlled, not compulsory.</li>
+        <li>Observe whether chosen visibility reduces the pull of threat-based visibility.</li>
+      </ul>
+    </div>
+  `;
+}
+
+function angleFromPoint(x,y){return Math.atan2(y-C.y,x-C.x)*180/Math.PI}
+
+let pointerStartX=0, pointerStartY=0, moved=false, pointerTarget=null;
+const DRAG_THRESHOLD=8;
+
+viewport.addEventListener('pointerdown',e=>{
+  dragging=true;
+  moved=false;
+  pointerStartX=e.clientX;
+  pointerStartY=e.clientY;
+  pointerTarget=e.target;
+  const r=viewport.getBoundingClientRect(),
+        sx=(e.clientX-r.left)/r.width*1000,
+        sy=(e.clientY-r.top)/r.height*1000;
+  lastAngle=angleFromPoint(sx,sy);
+  viewport.setPointerCapture?.(e.pointerId);
+});
+
+viewport.addEventListener('pointermove',e=>{
+  if(!dragging)return;
+  const dist=Math.hypot(e.clientX-pointerStartX,e.clientY-pointerStartY);
+  if(dist<DRAG_THRESHOLD && !moved) return;
+  moved=true;
+  viewport.classList.add('dragging');
+
+  const r=viewport.getBoundingClientRect(),
+        sx=(e.clientX-r.left)/r.width*1000,
+        sy=(e.clientY-r.top)/r.height*1000;
+  const a=angleFromPoint(sx,sy);
+  let delta=a-lastAngle;
+  if(delta>180) delta-=360;
+  if(delta<-180) delta+=360;
+  angleOffset+=delta;
+  lastAngle=a;
+  render();
+});
+
+viewport.addEventListener('pointerup',e=>{
+  const wasMoved=moved;
+  dragging=false;
+  viewport.classList.remove('dragging');
+
+  if(!wasMoved){
+    const target=document.elementFromPoint(e.clientX,e.clientY);
+    const nodeEl=target?.closest?.('[data-node]');
+    const stationEl=target?.closest?.('[data-station]');
+    const crossEl=target?.closest?.('[data-crossroads]');
+
+    if(nodeEl && nodeMap[nodeEl.dataset.node]){
+      showNode(nodeMap[nodeEl.dataset.node]);
+    } else if(stationEl && stationMap[stationEl.dataset.station]){
+      showStation(stationMap[stationEl.dataset.station]);
+    } else if(crossEl){
+      showCrossroads();
+    }
+  }
+});
+
+viewport.addEventListener('pointercancel',()=>{
+  dragging=false;
+  moved=false;
+  viewport.classList.remove('dragging');
+});
+
+resetBtn.addEventListener('click',()=>{angleOffset=0;emphasizeCross=false;showRoutes=true;crossBtn.textContent='Punch up Crossroads';routesBtn.textContent='Hide routes';render();showStation(stationMap['forge'])});
+crossBtn.addEventListener('click',()=>{emphasizeCross=!emphasizeCross;crossBtn.textContent=emphasizeCross?'Normal Crossroads':'Punch up Crossroads';render();if(emphasizeCross)showCrossroads();else showStation(stationMap['forge'])});
+routesBtn.addEventListener('click',()=>{showRoutes=!showRoutes;routesBtn.textContent=showRoutes?'Hide routes':'Show routes';render()});
+
+document.querySelectorAll('.tab').forEach(tab=>tab.addEventListener('click',()=>{
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  tab.classList.add('active');document.getElementById(tab.dataset.tab).classList.add('active')
+}));
+
+renderTasks();
+render();
+showStation(stationMap['forge']);
+</script>
+</body>
+</html>
