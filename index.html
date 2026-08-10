@@ -1,589 +1,327 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>The Observatory</title>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>The Observatory · Constitutional Build v1.4 · Agency Horizon</title>
 <style>
-:root{
-  --bg:#071019;
-  --bg2:#0a1420;
-  --panel:#0d1824;
-  --panel2:#101c29;
-  --ink:#f3ead9;
-  --muted:#aca79f;
-  --gold:#d5a85a;
-  --gold2:#f1d6a1;
-  --line:rgba(213,168,90,.28);
-  --line2:rgba(255,255,255,.07);
-}
-*{box-sizing:border-box}
-html{scroll-behavior:smooth}
-body{
-  margin:0;
-  background:#061019;
-  color:var(--ink);
-  font-family:Inter,system-ui,-apple-system,"Segoe UI",sans-serif;
-}
-a{color:inherit;text-decoration:none}
-button,input{font:inherit}
-.page{
-  min-height:100vh;
-  background:
-    radial-gradient(circle at 80% 8%,rgba(95,143,180,.08),transparent 22%),
-    linear-gradient(180deg,#071019 0%,#08131d 55%,#061019 100%);
-}
-.nav{
-  position:sticky;top:0;z-index:30;
-  background:rgba(4,9,14,.9);
-  backdrop-filter:blur(14px);
-  border-bottom:1px solid rgba(255,255,255,.06);
-}
-.nav-inner{
-  max-width:1520px;margin:auto;padding:14px 28px;
-  display:flex;align-items:center;justify-content:space-between;gap:20px
-}
-.brand{
-  display:flex;align-items:center;gap:12px;
-  font-family:Georgia,"Times New Roman",serif;
-  letter-spacing:.18em;text-transform:uppercase;
-  font-size:.92rem;white-space:nowrap
-}
-.brand-mark{
-  width:38px;height:38px;border:1px solid rgba(213,168,90,.6);
-  border-radius:50%;position:relative
-}
-.brand-mark::before,.brand-mark::after{
-  content:"";position:absolute;background:rgba(213,168,90,.55)
-}
-.brand-mark::before{left:50%;top:4px;bottom:4px;width:1px}
-.brand-mark::after{top:50%;left:4px;right:4px;height:1px}
-.brand-mark span{
-  position:absolute;inset:8px;border:1px solid rgba(213,168,90,.35);border-radius:50%
-}
-.nav-links{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
-.nav-links a{
-  color:#d7d1c6;font-size:.86rem;padding:8px 6px
-}
-.nav-links a:hover{color:var(--gold2)}
-.nav-btn{
-  border:1px solid rgba(213,168,90,.42);
-  padding:9px 14px!important;border-radius:5px
-}
-.nav-btn.primary{
-  background:linear-gradient(180deg,#f0d59c,#d6a85b);
-  color:#17120b!important;font-weight:700;border-color:#e3bd75
-}
-
-.hero{
-  position:relative;
-  min-height:640px;
-  display:flex;align-items:center;
-  background-image:
-    linear-gradient(90deg,rgba(4,9,14,.93) 0%,rgba(4,9,14,.80) 32%,rgba(4,9,14,.22) 59%,rgba(4,9,14,.08) 100%),
-    url('observatory-hero.png');
-  background-size:cover;
-  background-position:center;
-  border-bottom:1px solid var(--line);
-}
-
-.hero-lighthouse{
-  position:absolute;
-  right:13%;
-  top:52%;
-  transform:translateY(-50%);
-  width:170px;
-  height:270px;
-  z-index:5;
-  pointer-events:none;
-  filter:drop-shadow(0 18px 28px rgba(0,0,0,.42));
-}
-.hero-lighthouse::before{
-  content:"";
-  position:absolute;
-  right:98px;
-  top:40px;
-  width:250px;
-  height:58px;
-  background:linear-gradient(90deg,transparent 0%,rgba(255,217,102,.10) 22%,rgba(255,217,102,.30) 100%);
-  clip-path:polygon(0 36%,100% 0,100% 100%,0 64%);
-  filter:blur(2px);
-}
-.hero-lighthouse svg{
-  width:100%;
-  height:100%;
-  overflow:visible;
-}
-.hero-lighthouse .lantern-glow{
-  filter:drop-shadow(0 0 11px rgba(255,217,102,.95));
-}
-.hero-lighthouse .window-glow{
-  filter:drop-shadow(0 0 5px rgba(255,217,102,.72));
-}
-.hero-lighthouse .halo-ring{
-  fill:none;
-  stroke:rgba(213,168,90,.25);
-  stroke-width:.7;
-}
-.hero-lighthouse .halo-dot{
-  fill:#e7bc70;
-  filter:drop-shadow(0 0 4px rgba(231,188,112,.8));
-}
-
-.hero-inner{
-  width:100%;max-width:1520px;margin:auto;padding:72px 70px 74px;
-}
-.hero-copy{max-width:630px}
-.hero-star{
-  display:flex;align-items:center;gap:12px;color:var(--gold);
-  margin-bottom:14px
-}
-.hero-star::before{
-  content:"✦";font-size:1rem
-}
-.hero-star::after{
-  content:"";height:1px;width:180px;background:linear-gradient(90deg,var(--gold),transparent)
-}
-h1,h2,h3{
-  margin:0;font-family:Georgia,"Times New Roman",serif;font-weight:500;letter-spacing:-.02em
-}
-h1{
-  font-size:clamp(4rem,7vw,7rem);
-  line-height:.95;
-  margin-bottom:18px;
-  max-width:650px
-}
-.hero p{
-  max-width:580px;color:#d7d0c5;font-size:1.08rem;line-height:1.7;margin:0
-}
-.hero-actions{display:flex;gap:14px;flex-wrap:wrap;margin-top:24px}
-.btn{
-  display:inline-flex;align-items:center;justify-content:center;gap:10px;
-  min-width:180px;padding:14px 18px;border-radius:5px;
-  border:1px solid rgba(213,168,90,.38);
-  background:rgba(7,14,20,.64);color:#efe7db;font-weight:600
-}
-.btn.primary{
-  background:linear-gradient(180deg,#f0d59c,#d6a85b);color:#17120b;border-color:#e3bd75
-}
-.btn:hover{transform:translateY(-1px)}
-.watch{
-  display:flex;align-items:center;gap:10px;margin-top:15px;color:#bfb8ad;font-size:.82rem
-}
-.watch .play{
-  width:22px;height:22px;border:1px solid rgba(213,168,90,.5);border-radius:50%;
-  display:grid;place-items:center;color:var(--gold);font-size:.7rem
-}
-
-.section{
-  max-width:1520px;margin:0 auto;padding:34px 52px 0
-}
-.panel{
-  border:1px solid var(--line);
-  background:linear-gradient(180deg,rgba(14,27,40,.88),rgba(8,18,28,.92));
-  border-radius:6px;
-}
-.spaces-panel{padding:20px 22px 10px}
-.section-title{
-  display:flex;align-items:center;justify-content:center;gap:12px;
-  color:var(--gold2);font-family:Georgia,"Times New Roman",serif;
-  font-size:1.7rem;margin:0 0 18px
-}
-.section-title::before,.section-title::after{
-  content:"";height:1px;flex:1;max-width:180px;background:linear-gradient(90deg,transparent,var(--line))
-}
-.section-title::after{background:linear-gradient(90deg,var(--line),transparent)}
-.spaces{
-  display:grid;grid-template-columns:repeat(5,1fr);gap:10px
-}
-.space{
-  border:1px solid rgba(213,168,90,.18);
-  background:rgba(255,255,255,.012);
-  padding:18px;min-height:230px;
-  display:flex;flex-direction:column
-}
-.space-icon{
-  width:64px;height:64px;border-radius:50%;
-  border:1px solid rgba(213,168,90,.32);
-  display:grid;place-items:center;margin-bottom:12px;
-  color:var(--gold2);font-family:Georgia,serif;font-size:1.5rem;
-  background:
-    radial-gradient(circle at 50% 50%,rgba(213,168,90,.08),transparent 65%)
-}
-.space h3{font-size:1.35rem;margin-bottom:8px}
-.space p{color:#b9b4aa;line-height:1.55;font-size:.9rem;margin:0 0 18px}
-.space a{margin-top:auto;color:var(--gold2);font-size:.86rem}
-
-.reading-panel{
-  margin-top:12px;
-  display:grid;
-  grid-template-columns:.95fr 1.15fr .9fr;
-  min-height:290px;
-  overflow:hidden
-}
-.reading-intro{
-  padding:28px 28px;border-right:1px solid rgba(255,255,255,.05)
-}
-.eyebrow{
-  color:var(--gold);text-transform:uppercase;letter-spacing:.16em;font-size:.7rem;margin-bottom:12px
-}
-.reading-intro h2{font-size:2.4rem;line-height:1.08;margin-bottom:14px}
-.reading-intro p{color:#aaa59c;line-height:1.6;max-width:360px}
-.question-list{
-  padding:22px 26px;display:grid;align-content:center;gap:0
-}
-.question{
-  border-bottom:1px solid rgba(255,255,255,.06);
-  padding:14px 0;
-  display:grid;grid-template-columns:34px 1fr 20px;gap:12px;align-items:center
-}
-.question:last-child{border-bottom:none}
-.q-icon{
-  width:30px;height:30px;border:1px solid rgba(213,168,90,.3);
-  border-radius:50%;display:grid;place-items:center;color:var(--gold)
-}
-.question strong{
-  display:block;font-family:Georgia,serif;font-size:1rem;font-weight:500
-}
-.question small{display:block;color:#969189;margin-top:3px}
-.question .arrow{color:var(--gold)}
-.start-reading{
-  color:var(--gold2);font-size:.9rem;margin-top:10px;padding-left:46px
-}
-.reading-art{
-  min-height:290px;position:relative;
-  background:
-    radial-gradient(circle at 55% 50%,rgba(213,168,90,.18),transparent 10%),
-    radial-gradient(circle at 55% 50%,rgba(213,168,90,.05),transparent 30%),
-    linear-gradient(180deg,#0d1925,#09131d)
-}
-
-.mini-lighthouse{
-  position:absolute;
-  right:28px;
-  top:20px;
-  width:126px;
-  height:172px;
-  pointer-events:none;
-  opacity:.98;
-  filter:drop-shadow(0 8px 20px rgba(0,0,0,.28));
-}
-.mini-lighthouse::before{
-  content:"";
-  position:absolute;
-  left:-95px;
-  top:24px;
-  width:118px;
-  height:42px;
-  background:linear-gradient(90deg,transparent,rgba(255,217,102,.12),rgba(255,217,102,.24));
-  clip-path:polygon(0 30%,100% 0,100% 100%,0 70%);
-  filter:blur(2px);
-  opacity:.9;
-}
-.lighthouse-svg{
-  width:100%;
-  height:100%;
-  overflow:visible;
-}
-.lighthouse-svg .lantern-glow{
-  filter:drop-shadow(0 0 7px rgba(255,217,102,.9));
-}
-.lighthouse-svg .window-glow{
-  filter:drop-shadow(0 0 4px rgba(255,217,102,.65));
-}
-.lighthouse-caption{
-  position:absolute;
-  right:17px;
-  top:148px;
-  width:92px;
-  text-align:center;
-  color:rgba(241,214,161,.74);
-  font-family:Georgia,"Times New Roman",serif;
-  font-size:.64rem;
-  letter-spacing:.16em;
-  text-transform:uppercase;
-}
-
-.orbit{
-  position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
-  width:210px;height:210px;border:1px solid rgba(213,168,90,.32);border-radius:50%
-}
-.orbit::before,.orbit::after{
-  content:"";position:absolute;border:1px solid rgba(213,168,90,.22);border-radius:50%
-}
-.orbit::before{inset:20px}
-.orbit::after{inset:48px}
-.orbit .cross-x,.orbit .cross-y{
-  position:absolute;background:rgba(213,168,90,.28)
-}
-.orbit .cross-x{left:10px;right:10px;top:50%;height:1px}
-.orbit .cross-y{top:10px;bottom:10px;left:50%;width:1px}
-.orbit .core{
-  position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
-  width:14px;height:14px;border-radius:50%;background:#f0d59c;box-shadow:0 0 24px rgba(240,213,156,.75)
-}
-.footer-panel{
-  margin-top:12px;margin-bottom:34px;padding:24px 26px;
-  display:grid;grid-template-columns:1.4fr .7fr .7fr .7fr 1.3fr;gap:28px
-}
-.footer-brand p{color:#a39e95;font-size:.86rem;line-height:1.5}
-.footer-col h4{
-  margin:0 0 8px;color:var(--gold);font-size:.72rem;letter-spacing:.14em;text-transform:uppercase
-}
-.footer-col a{display:block;color:#b5b0a7;font-size:.84rem;margin:5px 0}
-.subscribe p{color:#9f9b93;font-size:.84rem;margin:0 0 10px}
-.subscribe-row{display:flex}
-.subscribe input{
-  flex:1;min-width:0;background:#08111a;border:1px solid rgba(255,255,255,.08);
-  color:var(--ink);padding:10px;border-radius:4px 0 0 4px;outline:none
-}
-.subscribe button{
-  border:none;background:linear-gradient(180deg,#f0d59c,#d6a85b);
-  color:#17120b;padding:10px 14px;border-radius:0 4px 4px 0;cursor:pointer
-}
-.copyright{color:#77736d;font-size:.72rem;margin-top:18px}
-
-@media(max-width:1150px){
-  .spaces{grid-template-columns:repeat(2,1fr)}
-  .reading-panel{grid-template-columns:1fr}
-  .reading-intro{border-right:none;border-bottom:1px solid rgba(255,255,255,.05)}
-  .reading-art{min-height:240px}
-  .footer-panel{grid-template-columns:1fr 1fr 1fr}
-}
-@media(max-width:1050px){
-  .hero-lighthouse{right:5%;width:145px;height:230px;opacity:.9}
-}
-@media(max-width:760px){
-  .hero-lighthouse{right:2%;top:28%;width:105px;height:170px;opacity:.76}
-
-  .nav-links a:not(.primary){display:none}
-  
-.hero-lighthouse{
-  position:absolute;
-  right:13%;
-  top:52%;
-  transform:translateY(-50%);
-  width:170px;
-  height:270px;
-  z-index:5;
-  pointer-events:none;
-  filter:drop-shadow(0 18px 28px rgba(0,0,0,.42));
-}
-.hero-lighthouse::before{
-  content:"";
-  position:absolute;
-  right:98px;
-  top:40px;
-  width:250px;
-  height:58px;
-  background:linear-gradient(90deg,transparent 0%,rgba(255,217,102,.10) 22%,rgba(255,217,102,.30) 100%);
-  clip-path:polygon(0 36%,100% 0,100% 100%,0 64%);
-  filter:blur(2px);
-}
-.hero-lighthouse svg{
-  width:100%;
-  height:100%;
-  overflow:visible;
-}
-.hero-lighthouse .lantern-glow{
-  filter:drop-shadow(0 0 11px rgba(255,217,102,.95));
-}
-.hero-lighthouse .window-glow{
-  filter:drop-shadow(0 0 5px rgba(255,217,102,.72));
-}
-.hero-lighthouse .halo-ring{
-  fill:none;
-  stroke:rgba(213,168,90,.25);
-  stroke-width:.7;
-}
-.hero-lighthouse .halo-dot{
-  fill:#e7bc70;
-  filter:drop-shadow(0 0 4px rgba(231,188,112,.8));
-}
-
-.hero-inner{padding:70px 24px}
-  .hero{background-position:68% center}
-  .section{padding:20px 14px 0}
-  .spaces{grid-template-columns:1fr}
-  .footer-panel{grid-template-columns:1fr}
-}
+:root{--bg:#071019;--panel:#0d1824;--panel2:#101c29;--ink:#f3ead9;--muted:#aaa69e;--gold:#d5a85a;--line:rgba(213,168,90,.24);--obs:#d9cfb5;--garden:#7bbd73;--cross:#8daef0;--forge:#d7a653;--harbour:#6cc1de;--danger:#e89386;--ok:#94d29e}
+*{box-sizing:border-box} body{margin:0;background:radial-gradient(circle at 70% 0,rgba(83,119,148,.08),transparent 28%),var(--bg);color:var(--ink);font-family:Inter,system-ui,-apple-system,"Segoe UI",sans-serif}
+button,select{font:inherit}.shell{max-width:1500px;margin:auto;padding:18px}.topbar{display:flex;justify-content:space-between;gap:14px;align-items:center;border-bottom:1px solid var(--line);padding:8px 0 15px}.brand{font-family:Georgia,serif;letter-spacing:.16em;text-transform:uppercase}.sub{color:var(--muted);font-size:.82rem}.hero{padding:34px 0 22px}.hero h1{font:500 clamp(2.3rem,5vw,5.4rem)/.95 Georgia,serif;margin:0 0 14px}.hero p{max-width:880px;color:#c9c4ba;line-height:1.65;margin:0}.layout{display:grid;grid-template-columns:minmax(0,1.65fr) minmax(330px,.75fr);gap:16px}.card{background:linear-gradient(180deg,rgba(16,28,41,.92),rgba(8,17,26,.94));border:1px solid var(--line);border-radius:18px;box-shadow:0 18px 50px rgba(0,0,0,.18)}.field-card{padding:14px}.lensbar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}.lens{border:1px solid rgba(255,255,255,.1);background:#0a141e;color:#cfc9bd;padding:9px 12px;border-radius:999px;cursor:pointer}.lens.active{border-color:currentColor;background:rgba(255,255,255,.05)}.lens[data-lens="observatory"]{color:var(--obs)}.lens[data-lens="garden"]{color:var(--garden)}.lens[data-lens="crossroads"]{color:var(--cross)}.lens[data-lens="forge"]{color:var(--forge)}.lens[data-lens="harbour"]{color:var(--harbour)}.perch{margin-left:auto;color:var(--gold);border-color:rgba(213,168,90,.45)}
+.viewport{position:relative;min-height:670px;overflow:hidden;border-radius:14px;border:1px solid rgba(255,255,255,.06);background:radial-gradient(circle at 50% 50%,rgba(255,255,255,.035),transparent 45%),#07111a}.field-note{position:absolute;left:16px;top:14px;z-index:4;color:#aca79f;font-size:.76rem;letter-spacing:.04em}.entity{position:absolute;transform:translate(-50%,-50%);width:128px;min-height:72px;border-radius:15px;border:1px solid rgba(255,255,255,.12);background:rgba(9,17,26,.92);color:#eee7db;display:flex;align-items:center;justify-content:center;text-align:center;padding:11px;cursor:pointer;transition:.2s box-shadow,.2s transform,.2s opacity,.2s border-color}.entity:hover,.entity.selected{transform:translate(-50%,-50%) scale(1.04);box-shadow:0 0 0 1px currentColor,0 18px 34px rgba(0,0,0,.25)}.entity small{display:block;color:#8e8a83;margin-top:4px}.edge{position:absolute;height:1px;transform-origin:0 0;background:rgba(255,255,255,.11);pointer-events:none}.edge.hard{background:rgba(232,147,134,.34)}.center{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:172px;height:172px;border:1px solid rgba(213,168,90,.22);border-radius:50%;display:grid;place-items:center;text-align:center;color:#cabf9f;background:radial-gradient(circle,rgba(213,168,90,.06),rgba(7,16,25,.86) 68%);pointer-events:none}.center b{font:500 1.15rem Georgia,serif}.side{display:grid;gap:16px;align-content:start}.panel{padding:18px}.eyebrow{text-transform:uppercase;letter-spacing:.17em;color:var(--gold);font-size:.68rem}.panel h2{font:500 1.6rem Georgia,serif;margin:7px 0 10px}.muted{color:var(--muted);line-height:1.55}.pillrow{display:flex;gap:6px;flex-wrap:wrap;margin:12px 0}.pill{font-size:.72rem;padding:5px 8px;border-radius:999px;border:1px solid rgba(255,255,255,.12);color:#c8c2b8}.section{border-top:1px solid rgba(255,255,255,.07);padding-top:12px;margin-top:12px}.section h3{font-size:.82rem;letter-spacing:.08em;text-transform:uppercase;color:#cfc6b5;margin:0 0 8px}.item{padding:9px 10px;border:1px solid rgba(255,255,255,.07);border-radius:10px;margin:7px 0;background:rgba(255,255,255,.018);font-size:.86rem;line-height:1.45}.score{font-variant-numeric:tabular-nums;color:var(--gold)}.ok{color:var(--ok)}.bad{color:var(--danger)}.policy-select{width:100%;background:#09131d;color:#eee;border:1px solid rgba(255,255,255,.12);padding:9px 10px;border-radius:10px}.article{font-size:.8rem;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.06)}.article b{color:var(--gold)}.review-btn{width:100%;margin-top:12px;border:1px solid rgba(213,168,90,.42);background:rgba(213,168,90,.08);color:var(--gold);padding:9px 10px;border-radius:10px;cursor:pointer}.review-btn:disabled{opacity:.38;cursor:default}.audit-mini{margin-top:10px;font-size:.76rem;color:var(--muted);line-height:1.45}.invalid-banner{border:1px solid rgba(232,147,134,.42);background:rgba(232,147,134,.07);color:#f0b0a5;border-radius:10px;padding:9px 10px;margin:11px 0;font-size:.8rem;line-height:1.45}.versionline{font-size:.72rem;color:#858078;margin-top:5px;word-break:break-all}.footer{padding:24px 0 8px;color:#77736d;font-size:.76rem;text-align:center}
+@media(max-width:980px){.layout{grid-template-columns:1fr}.viewport{min-height:590px}.side{grid-template-columns:1fr 1fr}.perch{margin-left:0}}
+@media(max-width:650px){.shell{padding:10px}.topbar{align-items:flex-start;flex-direction:column}.hero{padding:24px 4px 16px}.hero h1{font-size:2.55rem}.lensbar{display:grid;grid-template-columns:repeat(2,1fr)}.lens{width:100%}.perch{grid-column:1/-1}.viewport{min-height:610px}.entity{width:104px;min-height:62px;font-size:.78rem;padding:8px}.center{width:126px;height:126px}.side{grid-template-columns:1fr}.field-note{font-size:.66rem}}
 </style>
 </head>
 <body>
-<div class="page">
-  <nav class="nav">
-    <div class="nav-inner">
-      <a class="brand" href="index.html">
-        <span class="brand-mark"><span></span></span>
-        <span>The Observatory</span>
-      </a>
-      <div class="nav-links">
-        <a href="#spaces">Spaces</a>
-        <a href="#reading">First Reading</a>
-        <a href="app.html">Field Notes</a>
-        <a href="#about">About</a>
-        <a class="nav-btn" href="app.html">Sign in</a>
-        <a class="nav-btn primary" href="#reading">Build my Observatory</a>
-      </div>
-    </div>
-  </nav>
-
-  <header class="hero">
-
-    <div class="hero-lighthouse" aria-hidden="true">
-      <svg viewBox="-35 -20 170 200" xmlns="http://www.w3.org/2000/svg">
-        <ellipse class="halo-ring" cx="50" cy="88" rx="76" ry="31"/>
-        <ellipse class="halo-ring" cx="50" cy="88" rx="58" ry="23"/>
-        <circle class="halo-dot" cx="-3" cy="81" r="1.8"/>
-        <circle class="halo-dot" cx="106" cy="95" r="1.8"/>
-
-        <circle class="lantern-glow" cx="50" cy="30" r="14" fill="#ffd966" opacity="0.48"/>
-        <polygon points="40,140 60,140 57,50 43,50" fill="#4a3d2e"/>
-        <polygon points="38,145 62,145 60,140 40,140" fill="#2a231b"/>
-        <line x1="43" y1="50" x2="57" y2="50" stroke="#d4af37" stroke-width="2"/>
-        <rect class="window-glow" x="47" y="70" width="6" height="12" rx="3" fill="#ffd966"/>
-        <rect class="window-glow" x="47" y="105" width="6" height="12" rx="3" fill="#ffd966"/>
-        <rect x="41" y="20" width="18" height="30" rx="1.5" fill="#2a231b"/>
-        <rect class="lantern-glow" x="44" y="24" width="12" height="18" fill="#ffe599"/>
-        <polygon points="50,5 37,20 63,20" fill="#1f1812"/>
-        <ellipse cx="50" cy="148" rx="28" ry="6" fill="#262018"/>
-      </svg>
-    </div>
-    <div class="hero-inner">
-      <div class="hero-copy">
-        <div class="hero-star"></div>
-        <h1>Your life is not<br>a task list.</h1>
-        <p>A spatial framework for human synthesis, authorship and intelligent co-creation.</p>
-        <div class="hero-actions">
-          <a class="btn primary" href="#reading">Build my Observatory <span>✦</span></a>
-          <a class="btn" href="app.html">Enter the field <span>→</span></a>
-        </div>
-        <div class="watch">
-          <span class="play">▶</span>
-          <span>Watch the orientation</span>
-          <span>2:17 min</span>
-        </div>
-      </div>
-    </div>
+<div class="shell">
+  <header class="topbar">
+    <div><div class="brand">The Observatory</div><div class="sub">Constitutional build v1.4 · Harbour governs the agency horizon</div></div>
+    <div class="sub" id="systemStamp"></div>
   </header>
 
-  <main class="section">
-    <section class="panel spaces-panel" id="spaces">
-      <h2 class="section-title">Your spaces for becoming</h2>
-      <div class="spaces">
-        <article class="space">
-          <div class="space-icon">◉</div>
-          <h3>Observatory</h3>
-          <p>Gain clarity and perspective. See the patterns that shape your life.</p>
-          <a href="app.html">Enter Observatory →</a>
-        </article>
-        <article class="space">
-          <div class="space-icon">✿</div>
-          <h3>Garden</h3>
-          <p>Nurture what matters. Cultivate energy, attention and renewal.</p>
-          <a href="app.html">Enter Garden →</a>
-        </article>
-        <article class="space">
-          <div class="space-icon">◆</div>
-          <h3>Forge</h3>
-          <p>Build what is real. Create, refine and ship work that lasts.</p>
-          <a href="app.html">Enter Forge →</a>
-        </article>
-        <article class="space">
-          <div class="space-icon">≈</div>
-          <h3>Harbour</h3>
-          <p>Rest, reflect and receive. Let in what restores and sustains.</p>
-          <a href="app.html">Enter Harbour →</a>
-        </article>
-        <article class="space">
-          <div class="space-icon">✣</div>
-          <h3>Crossroads</h3>
-          <p>Discern your next steps. Choose with intention. Change with grace.</p>
-          <a href="app.html">Enter Crossroads →</a>
-        </article>
+  <section class="hero">
+    <h1>One reality. Five questions.</h1>
+    <p>The object does not move when the lens changes. Observatory, Garden, Crossroads, Forge and Harbour evaluate the same canonical entity for different purposes. Perch sits outside them. Harbour now governs the agency horizon: authority, reservation, reversibility, execution, reconciliation and the point where a possible future becomes an actual past.</p>
+  </section>
+
+  <div class="layout">
+    <section class="card field-card">
+      <div class="lensbar">
+        <button class="lens active" data-lens="observatory">Observatory</button>
+        <button class="lens" data-lens="garden">Garden</button>
+        <button class="lens" data-lens="crossroads">Crossroads</button>
+        <button class="lens" data-lens="forge">Forge</button>
+        <button class="lens" data-lens="harbour">Harbour</button>
+        <button class="lens perch" id="perchBtn">Perch · judicial review</button>
+      </div>
+      <div class="viewport" id="viewport">
+        <div class="field-note" id="fieldNote"></div>
+        <div id="edges"></div>
+        <div class="center"><div><b id="centerLens">OBSERVATORY</b><br><span class="sub">evaluation context</span></div></div>
+        <div id="entities"></div>
       </div>
     </section>
 
-    <section class="panel reading-panel" id="reading">
-      <div class="reading-intro">
-        <div class="eyebrow">First Reading</div>
-        <h2>Begin with a few guiding questions.</h2>
-        <p>Your answers shape a field that learns and grows with you.</p>
-      </div>
-
-      <div class="question-list">
-        <div class="question">
-          <span class="q-icon">✦</span>
-          <div><strong>What is calling for your attention now?</strong><small>Name what matters most.</small></div>
-          <span class="arrow">›</span>
-        </div>
-        <div class="question">
-          <span class="q-icon">◎</span>
-          <div><strong>What do you want your life to be in service of?</strong><small>Clarify your direction.</small></div>
-          <span class="arrow">›</span>
-        </div>
-        <div class="question">
-          <span class="q-icon">◉</span>
-          <div><strong>What patterns are you ready to transform?</strong><small>Reveal what you are ready to release.</small></div>
-          <span class="arrow">›</span>
-        </div>
-        <a class="start-reading" href="first-reading.html">Start your First Reading →</a>
-      </div>
-
-      <div class="reading-art" aria-hidden="true">
-        <div class="orbit">
-          <span class="cross-x"></span>
-          <span class="cross-y"></span>
-          <span class="core"></span>
-        </div>
-      </div>
-    </section>
-
-    <footer class="panel footer-panel" id="about">
-      <div class="footer-brand">
-        <a class="brand" href="index.html">
-          <span class="brand-mark"><span></span></span>
-          <span>The Observatory</span>
-        </a>
-        <p>A place to orient. A life to author.</p>
-        <div class="copyright">© 2026 The Observatory.</div>
-      </div>
-
-      <div class="footer-col">
-        <h4>Spaces</h4>
-        <a href="app.html">Observatory</a>
-        <a href="app.html">Garden</a>
-        <a href="app.html">Forge</a>
-        <a href="app.html">Harbour</a>
-        <a href="app.html">Crossroads</a>
-      </div>
-
-      <div class="footer-col">
-        <h4>Resources</h4>
-        <a href="app.html">Field Notes</a>
-        <a href="#reading">Guides</a>
-        <a href="#reading">Library</a>
-        <a href="#reading">Templates</a>
-      </div>
-
-      <div class="footer-col">
-        <h4>Company</h4>
-        <a href="#about">About</a>
-        <a href="#about">Careers</a>
-        <a href="#about">Privacy</a>
-        <a href="#about">Terms</a>
-      </div>
-
-      <div class="subscribe">
-        <div class="footer-col"><h4>Join the field</h4></div>
-        <p>Reflections, essays and updates.</p>
-        <div class="subscribe-row">
-          <input type="email" placeholder="Your email address">
-          <button type="button">Subscribe</button>
-        </div>
-      </div>
-    </footer>
-  </main>
+    <aside class="side">
+      <section class="card panel" id="inspector"></section>
+      <section class="card panel">
+        <div class="eyebrow">Decision policy</div>
+        <h2>Crossroads input</h2>
+        <select class="policy-select" id="policySelect"></select>
+        <div class="muted" id="policyText" style="margin-top:9px"></div><div id="policyMutationNote" class="muted" style="margin-top:9px"></div>
+      </section>
+      <section class="card panel" id="perchPanel">
+        <div class="eyebrow">Perch</div><h2>Constitutional status</h2><div id="perchSummary" class="muted"></div><button id="reevaluateBtn" class="review-btn" type="button">Run queued re-evaluation</button><div id="invalidationMini" class="audit-mini"></div>
+      </section>
+      <section class="card panel" id="uncertaintyPanel">
+        <div class="eyebrow">Joint uncertainty</div><h2>Decision surface</h2>
+        <div id="uncertaintySummary" class="muted"></div>
+        <button id="robustnessBtn" class="review-btn" type="button">Run robustness analysis</button>
+        <select class="policy-select" id="surfaceParam" style="margin-top:9px"></select>
+        <button id="surfaceBtn" class="review-btn" type="button">Map decision surface</button>
+        <div id="uncertaintyOutput" class="audit-mini"></div>
+      </section>
+    </aside>
+  </div>
+  <div class="footer">Constitutional prototype v1.4 · agency horizon · immutable execution facts · temporal justice · static ES modules</div>
 </div>
+
+<script type="module">
+import { entities, actionHypotheses, worldSnapshot, policies, statusQuoValues, uncertaintyModels, gardenGeneratorConfig, authorityGrants, executionFootprints } from './data.js';
+import {
+  ConstitutionalKernel, LAYERS, createContext, projectEntity,
+  registerRuntimePremises, stableHash, constitutionalArticles, createEvaluationModel,
+  evaluateRobustness, robustnessArtifact, mapDecisionSurface, decisionSurfaceArtifact, AgencyHorizon
+} from './engine.js';
+
+const state = {
+  activeLens:'observatory', selectedEntityId:'website', activePolicyId:'balanced', perchOpen:false,
+  lastMutationRecords:[], robustnessByEntity:new Map(), surfaceByEntity:new Map(),
+  reservationByEntity:new Map(), executionByEntity:new Map(), reconciliationByEntity:new Map()
+};
+const kernel = new ConstitutionalKernel();
+const agency = new AgencyHorizon({grants:authorityGrants,kernel});
+const byId = new Map(entities.map(e => [e.id,e]));
+const entityEls = new Map();
+const projectionCache = new Map();
+const colors = {observatory:'var(--obs)',garden:'var(--garden)',crossroads:'var(--cross)',forge:'var(--forge)',harbour:'var(--harbour)'};
+const lensEmitter = {
+  observatory:LAYERS.OBSERVATORY, garden:LAYERS.GARDEN, crossroads:LAYERS.CROSSROADS,
+  forge:LAYERS.FORGE, harbour:LAYERS.HARBOUR
+};
+const layerLens = {
+  [LAYERS.OBSERVATORY]:'observatory', [LAYERS.GARDEN]:'garden', [LAYERS.CROSSROADS]:'crossroads',
+  [LAYERS.FORGE]:'forge', [LAYERS.HARBOUR]:'harbour'
+};
+const layerOrder = {[LAYERS.OBSERVATORY]:1,[LAYERS.GARDEN]:2,[LAYERS.CROSSROADS]:3,[LAYERS.FORGE]:4,[LAYERS.HARBOUR]:5};
+
+function context(){
+  return createContext({ entities, hypotheses:actionHypotheses, snapshot:worldSnapshot, policies, activePolicy:policies.find(p=>p.id===state.activePolicyId), statusQuoValues, uncertaintyModels, generatorConfig:gardenGeneratorConfig, authorityGrants, executionFootprints });
+}
+function cacheKey(lens,entityId){ return `${lens}:${entityId}`; }
+function registerProjection(lens, entity){
+  const p=projectEntity(lens,entity,context());
+  kernel.registerArtifact(lensEmitter[lens],p.artifact);
+  projectionCache.set(cacheKey(lens,entity.id),p);
+  return p;
+}
+function initialiseRuntime(){
+  registerRuntimePremises(kernel,context());
+  for(const lens of ['observatory','garden','crossroads','forge','harbour']){
+    for(const entity of entities) registerProjection(lens,entity);
+  }
+}
+function projectionFor(entity){ return projectionCache.get(cacheKey(state.activeLens,entity.id)); }
+function artifactNodeForProjection(p){ return p?.artifact?.id ? kernel.getNode(p.artifact.id) : null; }
+
+function layoutEntities(){
+  const mount = document.getElementById('entities');
+  mount.innerHTML=''; entityEls.clear();
+  const cx=50, cy=50, rx=38, ry=36;
+  entities.forEach((e,i)=>{
+    const angle=(-Math.PI/2)+(i/entities.length)*Math.PI*2;
+    const x=cx+Math.cos(angle)*rx, y=cy+Math.sin(angle)*ry;
+    const el=document.createElement('button');
+    el.className='entity'; el.dataset.id=e.id; el.style.left=`${x}%`; el.style.top=`${y}%`;
+    el.innerHTML=`<span>${e.title}<small>${e.type}</small></span>`;
+    el.addEventListener('click',()=>{state.selectedEntityId=e.id;state.perchOpen=false;render()});
+    mount.appendChild(el); entityEls.set(e.id,{el,x,y});
+  });
+  renderEdges();
+}
+function renderEdges(){
+  const mount=document.getElementById('edges'); mount.innerHTML='';
+  for(const e of entities){
+    const a=entityEls.get(e.id); if(!a) continue;
+    for(const rel of e.relationships||[]){
+      const b=entityEls.get(rel.targetId); if(!b) continue;
+      const line=document.createElement('div');
+      const dx=b.x-a.x, dy=b.y-a.y, length=Math.hypot(dx,dy), angle=Math.atan2(dy,dx)*180/Math.PI;
+      line.className='edge '+(['requires','blocks'].includes(rel.relation)?'hard':'');
+      line.style.left=`${a.x}%`; line.style.top=`${a.y}%`; line.style.width=`${length}%`; line.style.transform=`rotate(${angle}deg)`;
+      mount.appendChild(line);
+    }
+  }
+}
+function entitySignal(entity){
+  const p=projectionFor(entity); if(!p) return {value:.05,label:'not evaluated'};
+  const node=artifactNodeForProjection(p);
+  if(node?.status==='invalidated') return {value:.12,label:'INVALIDATED · awaiting lawful re-evaluation'};
+  if(state.activeLens==='observatory') return {value:p.significance,label:`degree ${p.topology.degree}`};
+  if(state.activeLens==='garden') return {value:p.possibilities[0]?.importance/10 || .05,label:`${p.possibilities.length} possibility`};
+  if(state.activeLens==='crossroads') return {value:p.divergenceDetected?1:.15,label:p.divergenceDetected?'policy divergence':'policy convergence'};
+  if(state.activeLens==='forge') return {value:p.selectedAction?Math.min(1,Math.max(.15,p.selectedAction.score/5)):.08,label:p.state.replaceAll('_',' ')};
+  if(state.activeLens==='harbour') return {value:p.authorized?.9:.15,label:p.authorized?'authority present':'authority constrained'};
+  return {value:.2,label:''};
+}
+function renderField(){
+  const selected=byId.get(state.selectedEntityId); const color=colors[state.activeLens];
+  document.getElementById('centerLens').textContent=state.activeLens.toUpperCase();
+  document.getElementById('centerLens').style.color=color;
+  document.getElementById('fieldNote').textContent=`${state.activeLens.toUpperCase()} · same entity, version-bound projection`;
+  for(const e of entities){
+    const {el}=entityEls.get(e.id); const sig=entitySignal(e); const p=projectionCache.get(cacheKey(state.activeLens,e.id));
+    const invalid=artifactNodeForProjection(p)?.status==='invalidated';
+    el.classList.toggle('selected',e.id===selected.id); el.classList.toggle('invalidated',invalid);
+    el.style.color=invalid?'var(--danger)':color;
+    el.style.borderColor=invalid?'rgba(232,147,134,.72)':`color-mix(in srgb, ${color} ${Math.round(30+sig.value*55)}%, rgba(255,255,255,.10))`;
+    el.style.opacity=String(.48+sig.value*.52); el.title=sig.label;
+  }
+}
+function renderInspector(){
+  const entity=byId.get(state.selectedEntityId); const p=projectionFor(entity); const panel=document.getElementById('inspector');
+  if(!p){panel.innerHTML='<div class="muted">Projection not evaluated.</div>';return;}
+  const node=artifactNodeForProjection(p);
+  const invalid=node?.status==='invalidated'
+    ? `<div class="invalid-banner"><b>INVALIDATED JUDGMENT</b><br>${escapeHtml(node.invalidationReason||'An upstream premise changed.')}<div class="versionline">dead version ${node.versionHash}</div></div>`:'';
+  panel.innerHTML=`<div class="eyebrow">${state.activeLens}</div><h2>${entity.title}</h2><div class="muted">${escapeHtml(p.question||'')}</div>${invalid}${renderProjection(p,entity)}<div class="versionline">artifact ${p.artifact.id}@${p.artifact.versionHash}</div>`;
+}
+function renderProjection(p,entity){
+  if(p.lens==='observatory') return `<div class="pillrow"><span class="pill">${p.topology.degree} graph links</span><span class="pill">significance ${(p.significance*100).toFixed(0)}%</span><span class="pill">${p.uncertainties.length} uncertain evidence</span></div><div class="section"><h3>Epistemic claim</h3><div class="item">${escapeHtml(p.artifact.proposition)}<br><span class="score">model confidence ${p.artifact.confidence.toFixed(2)}</span></div></div><div class="section"><h3>Outgoing relationships</h3>${items((p.topology.outgoing||[]).map(r=>`${r.relation} → ${byId.get(r.targetId)?.title||r.targetId}`),'No modeled outgoing relationships.')}</div>`;
+  if(p.lens==='garden') return `<div class="pillrow"><span class="pill ${p.isProvisionalDueToCoverage?'bad':'ok'}">search coverage ${(p.overallCoverage*100).toFixed(1)}%</span><span class="pill">${(p.candidateActions||[]).length} hypotheses</span></div><div class="section"><h3>Possibilities</h3>${items((p.possibilities||[]).map(x=>`${x.description} · maturity ${(x.maturity*100).toFixed(0)}%`),'No incomplete modeled output.')}</div><div class="section"><h3>Search boundaries</h3>${items((p.searchBoundaries||[]).map(b=>`${b.mechanism}: ${b.searched?'searched':'UNSEARCHED'} · exhaustion ${(b.exhaustionScore*100).toFixed(0)}% · ${b.candidateCount} candidate(s)`),'No mechanism search record.')}</div><div class="section"><h3>Known blind spots</h3>${items((p.searchBoundaries||[]).flatMap(b=>(b.unexploredDomains||[]).map(x=>`${b.mechanism}: ${x}`)),'No declared search blind spots.')}</div><div class="section"><h3>Conditions</h3>${items((p.blockedConditions||[]).map(x=>x.conditionDescription),'No unresolved modeled prerequisite.')}</div>`;
+  if(p.lens==='crossroads') return `<div class="pillrow"><span class="pill ${p.divergenceDetected?'bad':'ok'}">${p.divergenceDetected?'normative conflict':'policy convergence'}</span></div><div class="section"><h3>Policy results</h3>${items((p.evaluations||[]).map(x=>`${x.policyName}: ${actionName(x.winnerActionId)}${x.score==null?'':` · ${x.score.toFixed(2)}`}`),'No action set available for policy comparison.')}</div><div class="section"><h3>Constitutional meaning</h3><div class="item">${p.divergenceDetected?'Facts no longer determine action without choosing between defensible value policies.':'The modeled policies currently converge on the same action.'}</div></div>`;
+  if(p.lens==='forge') { const cov=p.coverageAssessment; return `<div class="pillrow"><span class="pill">${p.state.replaceAll('_',' ')}</span>${p.selectedAction?`<span class="pill score">score ${p.selectedAction.score}</span>`:''}${cov?`<span class="pill ${cov.isProvisionalDueToCoverage?'bad':'ok'}">coverage ${(cov.overallCoverage*100).toFixed(1)}%</span>`:''}</div>${cov?.isProvisionalDueToCoverage?`<div class="invalid-banner"><b>PROVISIONAL_SEARCH_LIMITATION</b><br>Forge's ranking is conditional on an under-covered hypothesis space. This is search honesty, not model confidence.</div>`:''}<div class="section"><h3>Judgment</h3><div class="item">${p.selectedAction?`<b>${escapeHtml(p.selectedAction.description)}</b><br>${escapeHtml(p.rationale?.comparativeFact||'')}`:escapeHtml(p.reason||'No action selected.')}</div></div>${cov?`<div class="section"><h3>Search provenance</h3>${items([`overall coverage: ${(cov.overallCoverage*100).toFixed(1)}%`,`information-gain coverage: ${(cov.informationGainCoverage*100).toFixed(1)}%`,`model uncertainty: ${(cov.modelUncertainty*100).toFixed(1)}%`,...(cov.unexploredMechanisms||[]).map(m=>`unsearched mechanism: ${m}`)])}</div>`:''}${p.selectedAction?`<div class="section"><h3>Impact vector</h3>${items(Object.entries(p.selectedAction.normalizedImpact).map(([k,v])=>`${k}: ${v}`))}</div>`:''}<div class="section"><h3>Alternatives</h3>${items((p.alternatives||[]).map(a=>`${a.description}${a.score==null?' · blocked':` · ${a.score}`}`),'No competing action hypothesis.')}</div>`; }
+  if(p.lens==='harbour') {
+    const reservation=state.reservationByEntity.get(entity.id); const execution=state.executionByEntity.get(entity.id); const reconciliation=state.reconciliationByEntity.get(entity.id);
+    const liveGrant=p.authorityGrant?agency.getGrant(p.authorityGrant.id):null;
+    const rev=p.footprint?.reversibility;
+    const capacity=liveGrant?`reserved ${liveGrant.reserved?.executionCount||0}/${liveGrant.limits?.maxExecutions??'∞'} executions · financial reserved ${liveGrant.reserved?.financialCommitment||0}`:'No bound grant.';
+    const controls=!p.actionId?'':execution
+      ? `<button class="review-btn" id="reconcileBtn" type="button">${reconciliation?'Reconciled':'Reconcile observed outcome'}</button><button class="review-btn" id="driftBtn" type="button">Simulate post-execution premise drift</button>`
+      : reservation
+        ? `<button class="review-btn" id="executeBtn" type="button">Execute reserved action · simulated boundary</button>`
+        : `<button class="review-btn" id="reserveBtn" type="button" ${(p.authorized||p.canAuthorizeWithConfirmation)?'':'disabled'}>${p.authorized?'Reserve authority capacity':'Confirm + reserve authority capacity'}</button>`;
+    return `<div class="pillrow"><span class="pill ${p.authorized?'ok':p.canAuthorizeWithConfirmation?'':'bad'}">${p.authorized?'authority available':p.canAuthorizeWithConfirmation?'confirmation required':'execution not authorized'}</span><span class="pill">${p.requiredAuthority}</span>${rev?`<span class="pill ${['practically_irreversible','strictly_irreversible'].includes(rev.class)?'bad':''}">${rev.class.replaceAll('_',' ')}</span>`:''}</div>${p.requiresPrincipalSignoff?`<div class="invalid-banner"><b>PRINCIPAL SIGN-OFF REQUIRED</b><br>Harbour will not permit this reversibility class under the current delegated grant.</div>`:''}<div class="section"><h3>World crossing</h3><div class="item">${p.actionId?actionName(p.actionId):'Forge has not produced an executable action.'}</div></div><div class="section"><h3>Execution footprint</h3>${items([...(p.footprint?.expectedWorldChanges||[]),...(rev?.irreversibleDimensions||[]).map(x=>`irreversible dimension: ${x}`)],'No external footprint declared.')}</div><div class="section"><h3>Authority capacity</h3><div class="item">${escapeHtml(liveGrant?.id||'No grant')}<br>${escapeHtml(capacity)}</div></div><div class="section"><h3>Affected parties</h3>${items(p.affectedParties,'No affected party recorded.')}</div><div class="section"><h3>Lifecycle</h3>${items([reservation?`reservation: ${reservation.status}`:'reservation: none',execution?`execution: ${execution.result} · historical fact sealed`:'execution: none',reconciliation?`reconciliation: observed`:'reconciliation: pending'],'No agency state.')}${controls}</div>`;
+  }
+  return '';
+}
+function renderPerch(){
+  const artifacts=[...projectionCache.values()].map(p=>({emitter:lensEmitter[p.lens],artifact:p.artifact}));
+  const review=kernel.reviewSystem(entities,artifacts);
+  const invalidated=kernel.getInvalidatedNodes(); const pending=kernel.getReevaluationQueue(); const log=kernel.getInvalidationLog(); const historical=kernel.getHistoricalReviewQueue(); const executions=agency.getExecutionRecords();
+  document.getElementById('perchSummary').innerHTML=`<span class="${review.ok?'ok':'bad'}">${review.ok?'PASS':'VIOLATION'}</span> · ${review.failures.length} jurisdiction failure(s).<br><span class="${invalidated.length?'bad':'ok'}">${invalidated.length} invalidated judgment(s)</span> · ${pending.length} queued re-evaluation(s) · ${historical.length} historical review(s).<br>${executions.length} sealed execution fact(s).<br><br>Canonical graph: <span class="score">${stableHash(entities)}</span>`;
+  const btn=document.getElementById('reevaluateBtn'); btn.disabled=pending.length===0; btn.textContent=pending.length?`Run ${pending.length} queued re-evaluation${pending.length===1?'':'s'}`:'No re-evaluation pending';
+  document.getElementById('invalidationMini').innerHTML=log.length?`Latest death: ${escapeHtml(log.at(-1).targetArtifactId)}<br>${formatTime(log.at(-1).invalidatedAt)}`:'No judgment has yet been invalidated.';
+  if(state.perchOpen){
+    document.getElementById('inspector').innerHTML=`<div class="eyebrow">Perch · judicial review</div><h2>${review.ok?'Constitution holds':'Review required'}</h2><div class="muted">Perch emits no domain claim. It enforces jurisdiction, premise integrity and temporal validity.</div><div class="section"><h3>Re-evaluation docket</h3>${items(pending.map(q=>`${q.layer} · ${q.artifactId} · ${q.reason}`),'Docket empty.')}</div><div class="section"><h3>Invalidation record</h3>${items(log.slice(-8).reverse().map(r=>`${formatTime(r.invalidatedAt)} · ${r.targetArtifactId}@${r.targetVersionHash} died because ${r.invalidatedByPremiseId} changed.`),'No invalidation events recorded.')}</div><div class="section"><h3>Historical justice</h3>${items(historical.map(r=>`${r.executionArtifactId} preserved · review triggered by ${r.rootMutationId}`),'No executed fact is under post-execution review.')}</div><div class="section"><h3>Execution ledger</h3>${items(executions.map(x=>`${x.id} · ${x.result} · ${x.footprint?.reversibility?.class||'unknown reversibility'}`),'No action has crossed the simulated world boundary.')}</div><div class="section"><h3>Articles</h3>${constitutionalArticles().map(a=>`<div class="article"><b>Article ${a[0]} · ${a[1]}</b><br>${a[2]}</div>`).join('')}</div>`;
+  }
+}
+function uncertaintyFor(entityId){ return uncertaintyModels.find(m=>m.entityId===entityId) || null; }
+function baseEvaluationModel(){ return createEvaluationModel({entities,hypotheses:actionHypotheses,snapshot:worldSnapshot,policies,statusQuoValues,generatorConfig:gardenGeneratorConfig}); }
+function runRobustnessFor(entityId, shouldRender=true){
+  const model=uncertaintyFor(entityId); if(!model) return null;
+  const c=context();
+  const refs=[c.premiseRef(`entity:${entityId}`),c.premiseRef(`hypotheses:${entityId}`),c.premiseRef('world:current'),c.premiseRef('policy:selected'),c.premiseRef(`uncertainty:${entityId}`)];
+  const guard=kernel.verifyPremiseRefs(refs); if(!guard.valid) throw new Error(`Uncertainty analysis blocked by dead premise tree: ${guard.problems.join('; ')}`);
+  const profile=evaluateRobustness({baseModel:baseEvaluationModel(),entityId,activePolicyId:state.activePolicyId,uncertaintyModel:model,runs:2500,seed:20260811});
+  const artifact=robustnessArtifact(profile,c,model); kernel.registerArtifact(LAYERS.OBSERVATORY,artifact);
+  state.robustnessByEntity.set(entityId,{profile,artifact}); if(shouldRender) render(); return profile;
+}
+function runSurfaceFor(entityId, parameterId=null, shouldRender=true){
+  const model=uncertaintyFor(entityId); if(!model) return null;
+  const parameter=model.parameters.find(p=>p.id===(parameterId||document.getElementById('surfaceParam')?.value)) || model.parameters.find(p=>p.sweepDomain);
+  if(!parameter?.sweepDomain) return null;
+  const c=context();
+  const refs=[c.premiseRef(`entity:${entityId}`),c.premiseRef(`hypotheses:${entityId}`),c.premiseRef('world:current'),c.premiseRef('policy:selected'),c.premiseRef(`uncertainty:${entityId}`)];
+  const guard=kernel.verifyPremiseRefs(refs); if(!guard.valid) throw new Error(`Decision surface blocked by dead premise tree: ${guard.problems.join('; ')}`);
+  const profile=mapDecisionSurface({baseModel:baseEvaluationModel(),entityId,activePolicyId:state.activePolicyId,parameterPath:parameter.path,domain:parameter.sweepDomain,resolution:100,uncertaintyModels:[model]});
+  const artifact=decisionSurfaceArtifact(profile,c,model); kernel.registerArtifact(LAYERS.OBSERVATORY,artifact);
+  state.surfaceByEntity.set(entityId,{profile,artifact,parameterId:parameter.id}); if(shouldRender) render(); return profile;
+}
+function renderUncertainty(){
+  const entityId=state.selectedEntityId, model=uncertaintyFor(entityId), summary=document.getElementById('uncertaintySummary'), out=document.getElementById('uncertaintyOutput'), param=document.getElementById('surfaceParam');
+  const rb=document.getElementById('robustnessBtn'), sb=document.getElementById('surfaceBtn');
+  if(!model){ summary.textContent='No joint uncertainty model declared for this entity yet.'; param.innerHTML='<option>no sweepable parameter</option>'; rb.disabled=true; sb.disabled=true; out.innerHTML=''; return; }
+  rb.disabled=false; sb.disabled=false;
+  summary.innerHTML=`${escapeHtml(model.description)}<br>${model.parameters.length} uncertain parameter(s) · ${(model.scenarios||[]).length} joint scenario(s).`;
+  const current=state.surfaceByEntity.get(entityId)?.parameterId;
+  param.innerHTML=model.parameters.filter(p=>p.sweepDomain).map(p=>`<option value="${p.id}" ${p.id===current?'selected':''}>${escapeHtml(p.id)}</option>`).join('');
+  const r=state.robustnessByEntity.get(entityId); const sf=state.surfaceByEntity.get(entityId);
+  const rNode=r?kernel.getNode(r.artifact.id):null, sNode=sf?kernel.getNode(sf.artifact.id):null;
+  const robustness=r ? `${rNode?.status==='invalidated'?'<span class="bad">INVALIDATED ANALYSIS</span><br>':''}<b>Robustness</b>: ${actionName(r.profile.baseWinnerId)} held in <span class="score">${(r.profile.robustnessFrequency*100).toFixed(1)}%</span> of ${r.profile.runs.toLocaleString()} sampled plausible worlds.<br><span class="muted">Not confidence. Conditional on ${escapeHtml(r.profile.modelId)} and policy ${escapeHtml(r.profile.policyId)}; it does not resolve a Crossroads value conflict.</span>` : 'Robustness has not been sampled for this entity.';
+  const surface=sf ? `${sNode?.status==='invalidated'?'<br><span class="bad">INVALIDATED SURFACE</span>':''}<br><br><b>Decision regions · ${escapeHtml(sf.parameterId)}</b><br>${sf.profile.regions.map(x=>`${x.range[0].toFixed(3)}–${x.range[1].toFixed(3)} → ${escapeHtml(actionName(x.winningActionId))}`).join('<br>')}<br><span class="muted">Detection step ${sf.profile.detectionStep}. Narrow unobserved regions remain possible below that grid scale.</span>` : '';
+  out.innerHTML=robustness+surface;
+}
+
+
+function selectedHarbourProjection(){return projectionCache.get(cacheKey('harbour',state.selectedEntityId));}
+function bindAgencyControls(){
+  const p=selectedHarbourProjection(); if(!p||state.activeLens!=='harbour'||state.perchOpen)return;
+  document.getElementById('reserveBtn')?.addEventListener('click',()=>{
+    const c=context(); const action=c.hypotheses.find(a=>a.id===p.actionId); if(!action)return;
+    const result=agency.reserve({reservationId:`${state.selectedEntityId}-${Date.now()}`,action,footprint:p.footprint,grantId:action.authorityGrantId,recommendation:projectionCache.get(cacheKey('forge',state.selectedEntityId)).artifact,authorization:p.artifact,principalSignoff:true});
+    if(result.ok)state.reservationByEntity.set(state.selectedEntityId,result.reservation);
+    else alert(`Reservation refused: ${result.assessment.reasons.join(' ')}`);
+    render();
+  });
+  document.getElementById('executeBtn')?.addEventListener('click',()=>{
+    const reservation=state.reservationByEntity.get(state.selectedEntityId); const c=context(); const forge=projectionCache.get(cacheKey('forge',state.selectedEntityId)); const harbour=selectedHarbourProjection(); const action=c.hypotheses.find(a=>a.id===forge.selectedAction?.id);
+    if(!reservation||!action)return;
+    try{const result=agency.execute({reservationId:reservation.id,action,recommendation:forge.artifact,authorization:harbour.artifact,result:'completed'});state.executionByEntity.set(state.selectedEntityId,result.record);render();}
+    catch(err){alert(err.message);}
+  });
+  document.getElementById('reconcileBtn')?.addEventListener('click',()=>{
+    if(state.reconciliationByEntity.has(state.selectedEntityId))return;
+    const execution=state.executionByEntity.get(state.selectedEntityId); if(!execution)return;
+    const result=agency.reconcile({executionId:execution.id,observedConsequences:['Simulated execution crossed the boundary and was observed by Harbour.'],premiseDrift:false});
+    state.reconciliationByEntity.set(state.selectedEntityId,result); render();
+  });
+  document.getElementById('driftBtn')?.addEventListener('click',()=>{
+    const execution=state.executionByEntity.get(state.selectedEntityId); if(!execution)return;
+    worldSnapshot.timestamp=new Date().toISOString();
+    worldSnapshot.resources={...(worldSnapshot.resources||{}),agency_demo_drift:{value:true,confidence:1}};
+    const results=registerRuntimePremises(kernel,context()); state.lastMutationRecords=results.flatMap(r=>r.invalidationRecords||[]);
+    const result=agency.reconcile({executionId:execution.id,observedConsequences:['Execution remains historical fact after a later model change.'],premiseDrift:true,driftReason:'Simulated post-execution world premise drift.'});
+    state.reconciliationByEntity.set(state.selectedEntityId,result); render();
+  });
+}
+
+function renderPolicy(){
+  const sel=document.getElementById('policySelect');
+  sel.innerHTML=policies.map(p=>`<option value="${p.id}" ${p.id===state.activePolicyId?'selected':''}>${p.name}</option>`).join('');
+  const p=policies.find(x=>x.id===state.activePolicyId); document.getElementById('policyText').textContent=`${p.purpose} Authority: ${p.authority.selectedBy}.`;
+  document.getElementById('policyMutationNote').innerHTML=state.lastMutationRecords.length?`<span class="bad">Premise changed.</span> ${state.lastMutationRecords.length} downstream judgment(s) invalidated. Perch is holding them until re-evaluation.`:'';
+}
+function render(){
+  renderPolicy(); renderField(); if(!state.perchOpen)renderInspector(); renderPerch(); renderUncertainty(); bindAgencyControls();
+  document.getElementById('systemStamp').textContent=`graph ${stableHash(entities)} · world ${stableHash(worldSnapshot)} · ${kernel.getReevaluationQueue().length} pending`;
+}
+function runQueuedReevaluation(){
+  const pending=kernel.getReevaluationQueue().sort((a,b)=>(layerOrder[a.layer]||99)-(layerOrder[b.layer]||99));
+  const seen=new Set();
+  for(const q of pending){
+    if(seen.has(q.artifactId)) continue; seen.add(q.artifactId);
+    if(q.artifactId.startsWith('robust:')){ const entityId=q.artifactId.split(':')[1]; runRobustnessFor(entityId,false); continue; }
+    if(q.artifactId.startsWith('surface:')){ const entityId=q.artifactId.split(':')[1]; const previous=state.surfaceByEntity.get(entityId); runSurfaceFor(entityId,previous?.parameterId,false); continue; }
+    const lens=layerLens[q.layer]; if(!lens) continue;
+    const entityId=q.artifactId.split(':').slice(1).join(':'); const entity=byId.get(entityId); if(!entity) continue;
+    registerProjection(lens,entity);
+  }
+  state.lastMutationRecords=[]; render();
+}
+function mutateSelectedPolicy(newPolicyId){
+  state.activePolicyId=newPolicyId;
+  const results=registerRuntimePremises(kernel,context());
+  state.lastMutationRecords=results.flatMap(r=>r.invalidationRecords||[]);
+  render();
+}
+function items(list,empty='None recorded.'){return (list&&list.length)?list.map(x=>`<div class="item">${escapeHtml(String(x))}</div>`).join(''):`<div class="item muted">${empty}</div>`}
+function actionName(id){return context().hypotheses.find(a=>a.id===id)?.description||id||'No winner'}
+function escapeHtml(s){return String(s).replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#039;','"':'&quot;'}[c]))}
+function formatTime(value){const d=new Date(value);return Number.isNaN(d.getTime())?'unknown time':d.toLocaleTimeString([], {hour:'2-digit',minute:'2-digit',second:'2-digit'});}
+
+document.querySelectorAll('[data-lens]').forEach(btn=>btn.addEventListener('click',()=>{
+  state.activeLens=btn.dataset.lens; state.perchOpen=false;
+  document.querySelectorAll('[data-lens]').forEach(b=>b.classList.toggle('active',b===btn)); render();
+}));
+document.getElementById('perchBtn').addEventListener('click',()=>{state.perchOpen=true;renderPerch()});
+document.getElementById('policySelect').addEventListener('change',e=>mutateSelectedPolicy(e.target.value));
+document.getElementById('reevaluateBtn').addEventListener('click',runQueuedReevaluation);
+document.getElementById('robustnessBtn').addEventListener('click',()=>runRobustnessFor(state.selectedEntityId));
+document.getElementById('surfaceBtn').addEventListener('click',()=>runSurfaceFor(state.selectedEntityId));
+
+initialiseRuntime(); layoutEntities(); render();
+</script>
 </body>
 </html>
