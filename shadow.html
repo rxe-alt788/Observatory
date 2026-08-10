@@ -191,6 +191,12 @@ textarea:focus,input:focus{border-color:rgba(213,168,90,.55)}
   background:#0a151f;padding:16px
 }
 .summary-panel h3{font-size:1.45rem;margin-bottom:10px}
+.share-status{
+  margin-top:10px;
+  color:var(--muted);
+  font-size:.84rem;
+  min-height:1.2em;
+}
 .summary-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
 .summary-card{border:1px solid var(--line);border-radius:8px;padding:10px}
 .summary-card b{display:block;font-size:1.08rem}
@@ -440,6 +446,8 @@ textarea:focus,input:focus{border-color:rgba(213,168,90,.55)}
       <button id="side">Side</button>
       <button id="routes">Highlight routes</button>
       <button id="crossroads">Crossroads</button>
+      <button id="copySummary">Copy summary</button>
+      <button id="shareSummary">Share my Observatory</button>
     </div>
   </div>
 
@@ -464,6 +472,7 @@ textarea:focus,input:focus{border-color:rgba(213,168,90,.55)}
   <div class="summary-panel">
     <h3>Field reading</h3>
     <div class="summary-grid" id="summary"></div>
+    <div class="share-status" id="shareStatus" aria-live="polite"></div>
   </div>
 </section>
 
@@ -961,6 +970,128 @@ function showToday(){
   document.getElementById('today').scrollIntoView({behavior:'smooth'});
 }
 
+
+function buildShareSummary(){
+  if(!currentData.nodes.length) return '';
+
+  const byId=new Map(currentData.nodes.map(n=>[n.id,n]));
+  const lines=[];
+
+  lines.push('THE OBSERVATORY · SHADOW FIELD');
+  lines.push('');
+  lines.push('FIRST READING');
+
+  const qLabels={
+    1:'What are you trying to bring into existence?',
+    2:'What is taking more attention than you want?',
+    3:'What keeps returning?',
+    4:'What needs resolving?',
+    5:'What are you carrying that may already be finished?',
+    6:'What keeps you steady?',
+    7:'What is one concrete thing you can make, send, repair or begin now?',
+    8:'What would a more authored life look like one month from now?'
+  };
+
+  [...currentData.nodes]
+    .sort((a,b)=>a.q-b.q)
+    .forEach(n=>{
+      lines.push(qLabels[n.q]);
+      lines.push(`Answer: ${n.text}`);
+      lines.push(`Placed in: ${n.station}`);
+      lines.push('');
+    });
+
+  const today=deriveToday(currentData);
+  lines.push('TODAY');
+  if(today.length){
+    today.forEach((t,i)=>{
+      lines.push(`${i+1}. ${t.title}`);
+      lines.push(`   ${t.node.station} · ${t.priority} priority · ${t.deadline}`);
+      lines.push(`   ${t.detail}`);
+    });
+  }else{
+    lines.push('No immediate Today items were derived.');
+  }
+  lines.push('');
+
+  lines.push('CROSSROADS');
+  const cross=currentData.routes.filter(r=>r.kind==='crossroads');
+  if(cross.length){
+    cross.forEach((r,i)=>{
+      const a=byId.get(r.a),b=byId.get(r.b);
+      lines.push(`${i+1}. ${a.label} ↔ ${b.label}`);
+      lines.push(`   ${r.reason}`);
+    });
+  }else{
+    lines.push('No Crossroads candidates were identified in this reading.');
+  }
+  lines.push('');
+
+  lines.push('FIELD SUMMARY');
+  const counts={};
+  currentData.nodes.forEach(n=>counts[n.station]=(counts[n.station]||0)+1);
+  Object.entries(counts).forEach(([station,count])=>lines.push(`${station}: ${count}`));
+
+  return lines.join('\n');
+}
+
+async function copySummary(){
+  const text=buildShareSummary();
+  const status=document.getElementById('shareStatus');
+  if(!text){
+    status.textContent='Generate your Observatory first.';
+    return;
+  }
+
+  try{
+    await navigator.clipboard.writeText(text);
+    status.textContent='Summary copied. Paste it into Messages, Mail or anywhere else.';
+  }catch(err){
+    const ta=document.createElement('textarea');
+    ta.value=text;
+    ta.setAttribute('readonly','');
+    ta.style.position='fixed';
+    ta.style.opacity='0';
+    document.body.appendChild(ta);
+    ta.select();
+    try{
+      document.execCommand('copy');
+      status.textContent='Summary copied. Paste it into Messages, Mail or anywhere else.';
+    }catch(e){
+      status.textContent='Copy was blocked by this browser. Use Share my Observatory instead.';
+    }
+    document.body.removeChild(ta);
+  }
+}
+
+async function shareSummary(){
+  const text=buildShareSummary();
+  const status=document.getElementById('shareStatus');
+  if(!text){
+    status.textContent='Generate your Observatory first.';
+    return;
+  }
+
+  if(navigator.share){
+    try{
+      await navigator.share({
+        title:'The Observatory · Shadow Field',
+        text
+      });
+      status.textContent='Shared from this device.';
+      return;
+    }catch(err){
+      if(err && err.name==='AbortError'){
+        status.textContent='Share cancelled.';
+        return;
+      }
+    }
+  }
+
+  await copySummary();
+  status.textContent='This browser cannot open the share sheet, so the summary was copied instead.';
+}
+
 document.getElementById('generate').addEventListener('click',()=>{
   const data=makeFieldData();
   if(!data.nodes.length){
@@ -977,6 +1108,8 @@ document.getElementById('generate').addEventListener('click',()=>{
   ));
 });
 
+document.getElementById('copySummary').addEventListener('click',copySummary);
+document.getElementById('shareSummary').addEventListener('click',shareSummary);
 document.getElementById('todayTab').addEventListener('click',showToday);
 document.getElementById('backToField').addEventListener('click',()=>{
   document.getElementById('field').scrollIntoView({behavior:'smooth'});
@@ -1032,6 +1165,7 @@ document.getElementById('resetAll').addEventListener('click',()=>{
   localStorage.removeItem('observatory_shadow_answers');
   document.getElementById('field').classList.remove('active');
   document.getElementById('today').classList.remove('active');
+  document.getElementById('shareStatus').textContent='';
 });
 
 window.addEventListener('resize',resize);
