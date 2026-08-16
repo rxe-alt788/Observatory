@@ -1,759 +1,191 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>The Observatory · Shadow Field</title>
-
-<script type="importmap">
-{
-  "imports": {
-    "three": "https://cdn.jsdelivr.net/npm/three@0.185.0/build/three.module.js",
-    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.185.0/examples/jsm/"
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="The Observatory Shadow Field: source-preserving cognitive terrain mapping.">
+  <title>The Observatory · Shadow Field v2</title>
+  <link rel="stylesheet" href="shadow.css">
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "https://cdn.jsdelivr.net/npm/three@0.185.0/build/three.module.js",
+      "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.185.0/examples/jsm/"
+    }
   }
-}
-</script>
-
-<style>
-:root{
-  --bg:#071019;
-  --bg2:#0a1420;
-  --panel:#0d1824;
-  --ink:#f3ead9;
-  --muted:#aaa79f;
-  --gold:#d5a85a;
-  --gold2:#f1d6a1;
-  --blue:#7fc1df;
-  --line:rgba(213,168,90,.28);
-  --urgent:#ef766a;
-  --medium:#f2a65a;
-}
-*{box-sizing:border-box}
-html{scroll-behavior:smooth}
-body{
-  margin:0;background:#061019;color:var(--ink);
-  font-family:Inter,system-ui,-apple-system,"Segoe UI",sans-serif;
-}
-a{color:inherit;text-decoration:none}
-button,input,textarea{font:inherit}
-.nav{
-  position:sticky;top:0;z-index:30;background:rgba(4,9,14,.9);
-  backdrop-filter:blur(14px);border-bottom:1px solid rgba(255,255,255,.06)
-}
-.navin{
-  max-width:1480px;margin:auto;padding:14px 24px;
-  display:flex;justify-content:space-between;align-items:center;gap:18px
-}
-.brand{
-  display:flex;align-items:center;gap:11px;font-family:Georgia,serif;
-  letter-spacing:.17em;text-transform:uppercase;font-size:.88rem
-}
-.mark{width:35px;height:35px;border:1px solid rgba(213,168,90,.55);border-radius:50%;position:relative}
-.mark:before,.mark:after{content:"";position:absolute;background:rgba(213,168,90,.55)}
-.mark:before{top:4px;bottom:4px;width:1px;left:50%}
-.mark:after{left:4px;right:4px;height:1px;top:50%}
-.navright{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
-.navright a,.navright button{
-  border:1px solid rgba(213,168,90,.3);background:#0a141e;color:#eee6d9;
-  padding:8px 12px;border-radius:999px;font-size:.84rem;cursor:pointer
-}
-.hero{
-  position:relative;min-height:520px;display:flex;align-items:center;
-  background-image:
-    linear-gradient(90deg,rgba(4,9,14,.94),rgba(4,9,14,.78) 32%,rgba(4,9,14,.18) 60%,rgba(4,9,14,.06)),
-    url('observatory-hero.png');
-  background-size:cover;background-position:center;border-bottom:1px solid var(--line)
-}
-
-.shadow-lighthouse{
-  position:absolute;
-  right:12%;
-  top:52%;
-  transform:translateY(-50%);
-  width:160px;
-  height:250px;
-  z-index:4;
-  pointer-events:none;
-  filter:drop-shadow(0 18px 28px rgba(0,0,0,.42));
-}
-.shadow-lighthouse::before{
-  content:"";
-  position:absolute;
-  right:94px;
-  top:39px;
-  width:238px;
-  height:56px;
-  background:linear-gradient(90deg,transparent 0%,rgba(255,217,102,.10) 22%,rgba(255,217,102,.30) 100%);
-  clip-path:polygon(0 36%,100% 0,100% 100%,0 64%);
-  filter:blur(2px);
-}
-.shadow-lighthouse svg{
-  width:100%;
-  height:100%;
-  overflow:visible;
-}
-.shadow-lighthouse .lantern-glow{
-  filter:drop-shadow(0 0 11px rgba(255,217,102,.95));
-}
-.shadow-lighthouse .window-glow{
-  filter:drop-shadow(0 0 5px rgba(255,217,102,.72));
-}
-.shadow-lighthouse .halo-ring{
-  fill:none;
-  stroke:rgba(213,168,90,.25);
-  stroke-width:.7;
-}
-.shadow-lighthouse .halo-dot{
-  fill:#e7bc70;
-  filter:drop-shadow(0 0 4px rgba(231,188,112,.8));
-}
-
-.hero-inner{max-width:1480px;width:100%;margin:auto;padding:72px 24px}
-.hero-copy{max-width:650px}
-.eyebrow{color:var(--gold);text-transform:uppercase;letter-spacing:.17em;font-size:.72rem;margin-bottom:13px}
-h1,h2,h3{font-family:Georgia,"Times New Roman",serif;font-weight:500;letter-spacing:-.025em;margin:0}
-h1{font-size:clamp(3.8rem,7vw,6.8rem);line-height:.94;margin-bottom:18px}
-.hero p{max-width:590px;color:#d6d0c6;line-height:1.7;font-size:1.06rem}
-.btn{
-  appearance:none;border:1px solid rgba(213,168,90,.38);background:#0b151f;color:#eee7dc;
-  border-radius:5px;padding:13px 17px;cursor:pointer;font-weight:650
-}
-.btn.primary{background:linear-gradient(#f0d59c,#d6a85b);color:#17120b;border-color:#e3bd75}
-.hero-actions{display:flex;gap:12px;flex-wrap:wrap;margin-top:24px}
-.wrap{max-width:1480px;margin:auto;padding:42px 24px}
-.reading-head{max-width:820px;margin-bottom:24px}
-.reading-head h2{font-size:clamp(2.8rem,5vw,4.8rem);margin-bottom:10px}
-.reading-head p{color:var(--muted);line-height:1.65}
-.questions{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
-.q{
-  border:1px solid var(--line);background:linear-gradient(180deg,#0d1824,#09131d);
-  border-radius:8px;padding:17px
-}
-.q label{display:block;font-family:Georgia,serif;font-size:1.16rem;margin-bottom:7px}
-.q small{display:block;color:var(--muted);line-height:1.5;margin-bottom:10px}
-textarea,input{
-  width:100%;background:#07111a;color:var(--ink);
-  border:1px solid rgba(255,255,255,.09);border-radius:5px;padding:11px;outline:none
-}
-textarea{min-height:95px;resize:vertical}
-textarea:focus,input:focus{border-color:rgba(213,168,90,.55)}
-.generate{
-  margin-top:16px;display:flex;align-items:center;justify-content:space-between;
-  gap:14px;flex-wrap:wrap;padding:16px;border:1px solid var(--line);
-  background:#0a151f;border-radius:8px
-}
-.generate p{margin:0;color:var(--muted);line-height:1.5}
-.field-shell{display:none;padding:0 24px 50px;max-width:1480px;margin:auto}
-.field-shell.active{display:block}
-.field-head{
-  display:flex;align-items:end;justify-content:space-between;gap:16px;flex-wrap:wrap;margin:10px 0 16px
-}
-.field-head h2{font-size:clamp(2.8rem,5vw,4.8rem)}
-.field-head p{color:var(--muted);margin:7px 0 0;max-width:740px;line-height:1.6}
-.field-actions{display:flex;gap:8px;flex-wrap:wrap}
-.field-actions button{
-  border:1px solid var(--line);background:#0b151f;color:#eee6da;
-  padding:8px 11px;border-radius:999px;cursor:pointer
-}
-.field-grid{display:grid;grid-template-columns:minmax(0,1.45fr) minmax(320px,.72fr);gap:16px}
-.field-panel,.inspector{
-  border:1px solid var(--line);background:linear-gradient(180deg,#0d1824,#09131d);
-  border-radius:12px
-}
-.field-panel{padding:12px}
-.viewport{
-  height:min(74vh,720px);min-height:590px;border-radius:10px;overflow:hidden;position:relative;
-  background:radial-gradient(circle at 50% 48%,rgba(58,70,90,.78),rgba(10,14,20,.97) 70%)
-}
-#three{position:absolute;inset:0}
-.field-legend{
-  position:absolute;left:12px;bottom:12px;display:flex;gap:6px;flex-wrap:wrap;pointer-events:none
-}
-.field-legend span{
-  border:1px solid rgba(255,255,255,.08);background:rgba(5,8,12,.78);
-  border-radius:999px;padding:6px 8px;font-size:.72rem;color:#b9b4aa
-}
-.inspector{padding:16px;position:sticky;top:76px;align-self:start}
-.inspector h3{font-size:1.65rem;margin-bottom:8px}
-.badge{
-  display:inline-block;border:1px solid var(--line);border-radius:999px;
-  padding:5px 8px;font-size:.72rem;text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px
-}
-.detail{color:#d8d2c7;line-height:1.58;margin-bottom:10px}
-.metrics{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin:12px 0}
-.metric{border:1px solid var(--line);border-radius:8px;padding:9px;background:rgba(255,255,255,.015)}
-.metric b{display:block}.metric span{display:block;color:var(--muted);font-size:.72rem;margin-top:3px}
-.route-list{padding-left:18px;color:#d3cdc1;line-height:1.5}
-.callout{margin-top:12px;border:1px solid rgba(213,168,90,.25);background:rgba(213,168,90,.05);border-radius:8px;padding:11px}
-.callout b{display:block;margin-bottom:5px}
-.summary-panel{
-  margin-top:16px;border:1px solid var(--line);border-radius:10px;
-  background:#0a151f;padding:16px
-}
-.summary-panel h3{font-size:1.45rem;margin-bottom:10px}
-.summary-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
-.summary-card{border:1px solid var(--line);border-radius:8px;padding:10px}
-.summary-card b{display:block;font-size:1.08rem}
-.summary-card span{display:block;color:var(--muted);font-size:.75rem;margin-top:4px}
-@media(max-width:1050px){
-  .shadow-lighthouse{right:5%;width:138px;height:220px;opacity:.9}
-}
-@media(max-width:980px){
-  .questions{grid-template-columns:1fr}
-  .field-grid{grid-template-columns:1fr}
-  .inspector{position:static}
-}
-@media(max-width:650px){
-  .viewport{min-height:470px;height:62vh}
-  .navright a{display:none}
-  .summary-grid{grid-template-columns:repeat(2,1fr)}
-}
-</style>
+  </script>
 </head>
 <body>
-
-<nav class="nav">
-  <div class="navin">
-    <a class="brand" href="index.html"><span class="mark"></span><span>The Observatory</span></a>
-    <div class="navright">
-      <a href="index.html">Public home</a>
-      <button id="resetAll">Reset shadow field</button>
-    </div>
-  </div>
-</nav>
-
-<header class="hero">
-
-  <div class="shadow-lighthouse" aria-hidden="true">
-    <svg viewBox="-35 -20 170 200" xmlns="http://www.w3.org/2000/svg">
-      <ellipse class="halo-ring" cx="50" cy="88" rx="76" ry="31"/>
-      <ellipse class="halo-ring" cx="50" cy="88" rx="58" ry="23"/>
-      <circle class="halo-dot" cx="-3" cy="81" r="1.8"/>
-      <circle class="halo-dot" cx="106" cy="95" r="1.8"/>
-
-      <circle class="lantern-glow" cx="50" cy="30" r="14" fill="#ffd966" opacity="0.48"/>
-      <polygon points="40,140 60,140 57,50 43,50" fill="#4a3d2e"/>
-      <polygon points="38,145 62,145 60,140 40,140" fill="#2a231b"/>
-      <line x1="43" y1="50" x2="57" y2="50" stroke="#d4af37" stroke-width="2"/>
-      <rect class="window-glow" x="47" y="70" width="6" height="12" rx="3" fill="#ffd966"/>
-      <rect class="window-glow" x="47" y="105" width="6" height="12" rx="3" fill="#ffd966"/>
-      <rect x="41" y="20" width="18" height="30" rx="1.5" fill="#2a231b"/>
-      <rect class="lantern-glow" x="44" y="24" width="12" height="18" fill="#ffe599"/>
-      <polygon points="50,5 37,20 63,20" fill="#1f1812"/>
-      <ellipse cx="50" cy="148" rx="28" ry="6" fill="#262018"/>
-    </svg>
-  </div>
-  <div class="hero-inner">
-    <div class="hero-copy">
-      <div class="eyebrow">Shadow Observatory · synthesis trial</div>
-      <h1>Your life is not a task list.</h1>
-      <p>
-        Give the field some real material. This shadow version routes your answers into different spaces,
-        creates nodes, and makes the first relationships visible.
-      </p>
-      <div class="hero-actions">
-        <a class="btn primary" href="#reading">Begin First Reading</a>
-        <a class="btn" href="#field">See generated field</a>
+  <nav class="nav">
+    <div class="navin">
+      <a class="brand" href="index.html" aria-label="The Observatory home">
+        <span class="mark" aria-hidden="true"></span><span>The Observatory</span>
+      </a>
+      <div class="navright">
+        <button id="todayTab" type="button">Today</button>
+        <button id="remainderTab" type="button">Legitimate remainder</button>
+        <button id="resetAll" type="button">Reset field</button>
       </div>
     </div>
-  </div>
-</header>
+  </nav>
 
-<section class="wrap" id="reading">
-  <div class="reading-head">
-    <div class="eyebrow">First Reading</div>
-    <h2>Tell the field what is going on.</h2>
-    <p>
-      Short answers work. Long answers work. The first pass uses transparent routing rules rather than pretending
-      an algorithm has achieved enlightenment before dinner.
-    </p>
-  </div>
-
-  <div class="questions">
-    <div class="q">
-      <label for="q1">What are you trying to bring into existence?</label>
-      <small>A life, relationship, body of work, change, idea or something harder to name.</small>
-      <textarea id="q1"></textarea>
+  <header class="hero">
+    <div class="lighthouse" aria-hidden="true">
+      <svg viewBox="0 0 120 220" role="img">
+        <circle cx="60" cy="30" r="20" class="halo"></circle>
+        <path d="M47 42h26l7 151H40z" class="tower"></path>
+        <rect x="43" y="25" width="34" height="20" rx="4" class="lantern"></rect>
+        <rect x="52" y="70" width="16" height="20" rx="3" class="window"></rect>
+        <rect x="50" y="121" width="20" height="22" rx="3" class="window"></rect>
+        <path d="M28 194h64" class="ground"></path>
+      </svg>
     </div>
-    <div class="q">
-      <label for="q2">What is taking more attention than you want?</label>
-      <small>People, fear, work, conflict, administration, habits or unfinished business.</small>
-      <textarea id="q2"></textarea>
-    </div>
-    <div class="q">
-      <label for="q3">What keeps returning?</label>
-      <small>An idea, regret, person, project, image, question or possibility.</small>
-      <textarea id="q3"></textarea>
-    </div>
-    <div class="q">
-      <label for="q4">What needs resolving?</label>
-      <small>A promise, decision, apology, conversation, repair or ending.</small>
-      <textarea id="q4"></textarea>
-    </div>
-    <div class="q">
-      <label for="q5">What are you carrying that may already be finished?</label>
-      <small>A plan, identity, expectation, obligation, resentment or old version of yourself.</small>
-      <textarea id="q5"></textarea>
-    </div>
-    <div class="q">
-      <label for="q6">What keeps you steady?</label>
-      <small>People, animals, routines, places, habits or conditions worth protecting from urgency.</small>
-      <textarea id="q6"></textarea>
-    </div>
-    <div class="q">
-      <label for="q7">What is one concrete thing you can make, send, repair or begin now?</label>
-      <input id="q7">
-    </div>
-    <div class="q">
-      <label for="q8">What would a more authored life look like one month from now?</label>
-      <small>Describe evidence. What would actually be different?</small>
-      <textarea id="q8"></textarea>
-    </div>
-  </div>
-
-  <div class="generate">
-    <p><b>Create the first field.</b><br>The map will classify the material, generate nodes and draw initial relationships.</p>
-    <button class="btn primary" id="generate">Generate my Observatory</button>
-  </div>
-</section>
-
-<section class="field-shell" id="field">
-  <div class="field-head">
-    <div>
-      <div class="eyebrow">Generated field</div>
-      <h2>Your Observatory</h2>
-      <p>Rotate to separate overlapping relationships. Click a node to inspect why it was routed where it was.</p>
-    </div>
-    <div class="field-actions">
-      <button id="front">Front</button>
-      <button id="top">Top</button>
-      <button id="side">Side</button>
-      <button id="routes">Highlight routes</button>
-      <button id="crossroads">Crossroads</button>
-    </div>
-  </div>
-
-  <div class="field-grid">
-    <div class="field-panel">
-      <div class="viewport">
-        <div id="three"></div>
-        <div class="field-legend">
-          <span>Every line = relationship</span>
-          <span>Click node = inspect</span>
-          <span>Crossroads = transformation</span>
+    <div class="hero-inner">
+      <div class="hero-copy">
+        <div class="eyebrow">Shadow Field v2</div>
+        <h1>Map what is present.</h1>
+        <p>
+          The Observatory preserves what you enter, then separates source, observation, inference,
+          relationships and possible action. A state may be useless to the immediate order and still
+          have a defensible place outside it.
+        </p>
+        <div class="hero-actions">
+          <a class="btn primary" href="#capture">Enter the field</a>
+          <a class="btn" href="#principle">Read the governing principle</a>
         </div>
       </div>
     </div>
+  </header>
 
-    <aside class="inspector">
-      <h3>Inspector</h3>
-      <div id="inspect" class="detail">Generate the field, then select a node.</div>
-    </aside>
-  </div>
+  <main>
+    <section class="wrap principle" id="principle">
+      <div class="eyebrow">Governing principle</div>
+      <h2>Utility is relational, not existential.</h2>
+      <p class="lead">
+        The system measures whether a state contributes to the immediate order. It does not treat that
+        measurement as a verdict on whether the state deserves to exist. Being, considering, attempting,
+        trying, hiding, deferring, infecting or conferring may be useful now, obstructive now, or outside
+        the order entirely. The latter category is retained as <strong>legitimate remainder</strong> when its
+        place can be rationally described.
+      </p>
+      <div class="principle-grid">
+        <article><b>Immediate order</b><span>Movement, protection, resolution or delivery that matters now.</span></article>
+        <article><b>Legitimate remainder</b><span>Material not useful now but retained for an intelligible function or future condition.</span></article>
+        <article><b>Source sovereignty</b><span>Generated interpretation never replaces the original material.</span></article>
+      </div>
+    </section>
 
-  <div class="summary-panel">
-    <h3>Field reading</h3>
-    <div class="summary-grid" id="summary"></div>
-  </div>
-</section>
+    <section class="wrap" id="capture">
+      <div class="reading-head">
+        <div class="eyebrow">First reading</div>
+        <h2>What is present?</h2>
+        <p>Fragments are allowed. Contradictions are allowed. The first pass should not require you to know what the material is before you can observe it.</p>
+      </div>
 
-<script type="module">
-import * as THREE from 'three';
-import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+      <div class="primary-capture">
+        <label for="freeCapture">Primary source</label>
+        <small>Separate distinct thoughts with a blank line if you want them mapped as separate source objects.</small>
+        <textarea id="freeCapture" placeholder="What is present right now?"></textarea>
+      </div>
 
-const colors={
-  Observatory:0xd9cfb5,
-  Garden:0x7bbd73,
-  Forge:0xd7a653,
-  Harbour:0x6cc1de,
-  Resolve:0xd58a6c,
-  Archive:0x9182ab,
-  Compost:0x7e6c58,
-  Crossroads:0x8daef0
-};
+      <details class="lenses">
+        <summary>Optional lenses</summary>
+        <p>These prompts can expand the field. They do not determine where an answer belongs.</p>
+        <div class="questions">
+          <div class="q"><label for="q1">What are you trying to bring into existence?</label><textarea id="q1"></textarea></div>
+          <div class="q"><label for="q2">What is taking more attention than you want?</label><textarea id="q2"></textarea></div>
+          <div class="q"><label for="q3">What keeps returning?</label><textarea id="q3"></textarea></div>
+          <div class="q"><label for="q4">What needs resolving?</label><textarea id="q4"></textarea></div>
+          <div class="q"><label for="q5">What may already be finished?</label><textarea id="q5"></textarea></div>
+          <div class="q"><label for="q6">What keeps you steady?</label><textarea id="q6"></textarea></div>
+          <div class="q"><label for="q7">What concrete thing could move?</label><textarea id="q7"></textarea></div>
+          <div class="q"><label for="q8">What would evidence of change look like?</label><textarea id="q8"></textarea></div>
+        </div>
+      </details>
 
-const stationPositions={
-  Observatory:[0,210,70],
-  Garden:[-210,-145,105],
-  Forge:[205,-35,205],
-  Harbour:[-205,55,-220],
-  Resolve:[150,-15,-235],
-  Archive:[-110,-220,-105],
-  Compost:[100,-235,-35],
-  Crossroads:[0,0,0]
-};
+      <div class="generate">
+        <p><b>First representation.</b><br>Source is preserved. Everything else remains inspectable, contestable and correctable.</p>
+        <button class="btn primary" id="generate" type="button">Map what is present</button>
+      </div>
+    </section>
 
-const stationDescriptions={
-  Observatory:'Attention, diagnosis and pattern recognition.',
-  Garden:'Emerging things that need cultivation before delivery.',
-  Forge:'Concrete action, making, sending, publishing and finishing.',
-  Harbour:'Conditions, people and habits that protect baseline stability.',
-  Resolve:'Repair, overdue truth, closure and obligations with a live claimant.',
-  Archive:'Material worth retaining without keeping it active.',
-  Compost:'Material that may be ready to stop claiming present energy.',
-  Crossroads:'Where two parts of the field may change each other’s meaning.'
-};
+    <section class="field-shell" id="field" aria-live="polite">
+      <div class="field-head">
+        <div>
+          <div class="eyebrow">Generated field</div>
+          <h2>Current representation</h2>
+          <p>Rotate the terrain. Select a node to inspect the distance between source and inference.</p>
+        </div>
+        <div class="field-actions" role="group" aria-label="Field controls">
+          <button data-view="terrain" class="view-btn active" type="button">Terrain</button>
+          <button data-view="signals" class="view-btn" type="button">Signals</button>
+          <button data-view="utility" class="view-btn" type="button">Utility</button>
+          <button data-view="remainder" class="view-btn" type="button">Remainder</button>
+          <button data-view="source" class="view-btn" type="button">Source</button>
+          <button id="resetView" type="button">Reset view</button>
+        </div>
+      </div>
 
-function clean(s){ return (s||'').trim(); }
-function words(s){ return clean(s).toLowerCase(); }
+      <div class="field-grid">
+        <section class="field-panel" aria-label="Interactive terrain">
+          <div class="viewport">
+            <div id="three"></div>
+            <div class="view-status" id="viewStatus">Terrain · candidate placement</div>
+            <div class="field-legend">
+              <span>Node = source-derived object</span>
+              <span>Line = candidate relationship</span>
+              <span>Crossroads = relationship before storage</span>
+            </div>
+          </div>
+        </section>
 
-function classify(text, qIndex){
-  const t=words(text);
+        <aside class="inspector" id="inspector">
+          <h3>Inspector</h3>
+          <div id="inspect" class="detail">Map the field, then select a node.</div>
+        </aside>
+      </div>
 
-  if(qIndex===1) return 'Garden';
-  if(qIndex===2) return 'Observatory';
-  if(qIndex===4) return 'Resolve';
-  if(qIndex===5) return 'Compost';
-  if(qIndex===6) return 'Harbour';
-  if(qIndex===7) return 'Forge';
+      <section class="summary-panel">
+        <div class="section-head"><h3>Field reading</h3><span id="fieldVersion">draft representation</span></div>
+        <div class="summary-grid" id="summary"></div>
+      </section>
 
-  if(qIndex===8){
-    if(/launch|publish|business|commercial|website|build|make|write|send|finish|ship/.test(t)) return 'Forge';
-    if(/home|house|sleep|safe|steady|health|rest|cat|dog|family/.test(t)) return 'Harbour';
-    return 'Observatory';
-  }
+      <section class="ledger-panel">
+        <div class="section-head"><h3>Representation ledger</h3><span>source → observation → inference → action</span></div>
+        <div id="ledger" class="ledger"></div>
+      </section>
+    </section>
 
-  if(qIndex===3){
-    if(/regret|sorry|apolog|promise|friend|repair|unresolved|owe|respond/.test(t)) return 'Resolve';
-    if(/idea|project|game|book|website|create|make|design|write|art/.test(t)) return 'Garden';
-    if(/past|old|finished|leave|release|resent/.test(t)) return 'Compost';
-    return 'Observatory';
-  }
+    <section class="secondary-shell" id="remainder">
+      <div class="secondary-head">
+        <div>
+          <div class="eyebrow">Outside the immediate order</div>
+          <h2>Legitimate remainder</h2>
+          <p>These states are not presently useful to the immediate order, but the system can still state why they are being retained and what would cause re-entry.</p>
+        </div>
+        <button id="backFromRemainder" type="button">Back to field</button>
+      </div>
+      <div id="remainderList" class="card-list"><div class="empty">Map the field first.</div></div>
+    </section>
 
-  return 'Observatory';
-}
+    <section class="secondary-shell" id="today">
+      <div class="secondary-head">
+        <div>
+          <div class="eyebrow">Immediate order</div>
+          <h2>Today</h2>
+          <p>The smallest defensible set whose movement or protection matters now. No station receives automatic citizenship here.</p>
+        </div>
+        <button id="backFromToday" type="button">Back to field</button>
+      </div>
+      <div id="todayList" class="card-list"><div class="empty">Map the field first.</div></div>
+    </section>
+  </main>
 
-function priorityFor(text, station, qIndex){
-  const t=words(text);
-  if(qIndex===7 || station==='Forge' || station==='Resolve') return 'high';
-  if(station==='Harbour' && /sleep|safe|health|home|housing|water|hydrate/.test(t)) return 'high';
-  if(/urgent|today|tonight|now|immediate|must/.test(t)) return 'high';
-  if(station==='Archive' || station==='Compost') return 'low';
-  return 'medium';
-}
+  <footer>
+    <span>The Observatory · Shadow Field v2</span>
+    <span>Static client-side prototype. Source text remains local to this browser.</span>
+  </footer>
 
-function titleFor(text, index){
-  const raw=clean(text).replace(/\s+/g,' ');
-  if(!raw) return '';
-  const first=raw.split(/[.!?]/)[0];
-  const clipped=first.length>44 ? first.slice(0,41)+'…' : first;
-  return clipped || `Reading ${index}`;
-}
-
-function makeFieldData(){
-  const answers=[];
-  for(let i=1;i<=8;i++){
-    const value=clean(document.getElementById('q'+i).value);
-    if(value) answers.push({q:i,text:value});
-  }
-
-  const nodes=answers.map((a,i)=>{
-    const station=classify(a.text,a.q);
-    const base=stationPositions[station];
-    const angle=(i+1)*1.71;
-    const radius=28+((i%3)*10);
-    const jitter=[
-      Math.cos(angle)*radius,
-      ((i%4)-1.5)*15,
-      Math.sin(angle)*radius
-    ];
-    return {
-      id:'n'+i,
-      label:titleFor(a.text,a.q),
-      station,
-      q:a.q,
-      text:a.text,
-      priority:priorityFor(a.text,station,a.q),
-      position:[base[0]+jitter[0],base[1]+jitter[1],base[2]+jitter[2]]
-    };
-  });
-
-  // Relationship rules. Transparent on purpose.
-  const routes=[];
-  function add(a,b,kind){
-    if(!a||!b||a.id===b.id) return;
-    if(routes.some(r=>(r.a===a.id&&r.b===b.id)||(r.a===b.id&&r.b===a.id))) return;
-    routes.push({a:a.id,b:b.id,kind});
-  }
-
-  const byQ=q=>nodes.find(n=>n.q===q);
-  add(byQ(1),byQ(7),'creation → action');
-  add(byQ(2),byQ(6),'pressure ↔ stability');
-  add(byQ(3),byQ(4),'returning ↔ unresolved');
-  add(byQ(5),byQ(8),'release ↔ future');
-  add(byQ(7),byQ(8),'next move → desired state');
-
-  // same-station adjacency
-  for(let i=0;i<nodes.length;i++){
-    for(let j=i+1;j<nodes.length;j++){
-      if(nodes[i].station===nodes[j].station) add(nodes[i],nodes[j],'shared field');
-    }
-  }
-
-  // Crossroads candidates: contrasting stations.
-  const crossPairs=[
-    ['Observatory','Forge'],
-    ['Harbour','Forge'],
-    ['Garden','Resolve'],
-    ['Compost','Garden']
-  ];
-  for(const [s1,s2] of crossPairs){
-    const a=nodes.find(n=>n.station===s1);
-    const b=nodes.find(n=>n.station===s2);
-    if(a&&b) add(a,b,'crossroads');
-  }
-
-  return {nodes,routes};
-}
-
-let renderer,scene,camera,controls,raycaster,pointer,clickables=[],routeGroup,nodeGroup;
-let currentData={nodes:[],routes:[]};
-let routesMode=false,crossroadsMode=false;
-
-function makeLabel(text){
-  const c=document.createElement('canvas');
-  const x=c.getContext('2d');
-  const dpr=2;
-  x.font=`700 ${15*dpr}px Inter,Arial`;
-  const w=Math.ceil(x.measureText(text).width+30*dpr),h=38*dpr;
-  c.width=w;c.height=h;
-  x.font=`700 ${15*dpr}px Inter,Arial`;
-  x.fillStyle='rgba(5,8,12,.94)';
-  roundRect(x,0,0,w,h,18*dpr);x.fill();
-  x.strokeStyle='rgba(255,255,255,.18)';x.stroke();
-  x.fillStyle='#f1ede5';x.textAlign='center';x.textBaseline='middle';
-  x.fillText(text,w/2,h/2);
-  const tex=new THREE.CanvasTexture(c);
-  tex.colorSpace=THREE.SRGBColorSpace;
-  const mat=new THREE.SpriteMaterial({map:tex,transparent:true,depthWrite:false});
-  const s=new THREE.Sprite(mat);
-  s.scale.set(w*.34,h*.34,1);
-  return s;
-}
-function roundRect(ctx,x,y,w,h,r){
-  ctx.beginPath();ctx.moveTo(x+r,y);ctx.lineTo(x+w-r,y);
-  ctx.quadraticCurveTo(x+w,y,x+w,y+r);ctx.lineTo(x+w,y+h-r);
-  ctx.quadraticCurveTo(x+w,y+h,x+w-r,y+h);ctx.lineTo(x+r,y+h);
-  ctx.quadraticCurveTo(x,y+h,x,y+h-r);ctx.lineTo(x,y+r);
-  ctx.quadraticCurveTo(x,y,x+r,y);ctx.closePath();
-}
-function makeRoute(start,end,isCross){
-  const a=new THREE.Vector3(...start),b=new THREE.Vector3(...end);
-  const dir=new THREE.Vector3().subVectors(b,a);
-  const len=dir.length();
-  const mid=new THREE.Vector3().addVectors(a,b).multiplyScalar(.5);
-  const r=isCross?1.6:1.05;
-  const geo=new THREE.CylinderGeometry(r,r,len,8,1,true);
-  const mat=new THREE.MeshBasicMaterial({
-    color:isCross?0x9bb9ff:0xa2acb8,
-    transparent:true,opacity:isCross?.72:.32,depthWrite:false
-  });
-  const mesh=new THREE.Mesh(geo,mat);
-  mesh.position.copy(mid);
-  mesh.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0),dir.normalize());
-  mesh.userData={cross:isCross,baseOpacity:isCross?.72:.32};
-  return mesh;
-}
-function initScene(){
-  const mount=document.getElementById('three');
-  mount.innerHTML='';
-  scene=new THREE.Scene();
-  scene.fog=new THREE.FogExp2(0x0d1219,.0007);
-  camera=new THREE.PerspectiveCamera(45,1,1,3000);
-  camera.position.set(430,320,560);
-  renderer=new THREE.WebGLRenderer({antialias:true,alpha:true});
-  renderer.setPixelRatio(Math.min(devicePixelRatio,2));
-  renderer.outputColorSpace=THREE.SRGBColorSpace;
-  mount.appendChild(renderer.domElement);
-
-  controls=new OrbitControls(camera,renderer.domElement);
-  controls.enableDamping=true;controls.dampingFactor=.065;
-  controls.minDistance=260;controls.maxDistance=1400;
-
-  scene.add(new THREE.AmbientLight(0xffffff,2.05));
-  const key=new THREE.DirectionalLight(0xf7f0df,2.8);key.position.set(420,500,300);scene.add(key);
-  const rim=new THREE.PointLight(0x9bb9ff,1600,1300,2);rim.position.set(-420,160,-240);scene.add(rim);
-
-  nodeGroup=new THREE.Group();scene.add(nodeGroup);
-  routeGroup=new THREE.Group();scene.add(routeGroup);
-
-  // faint rings only, no axes inside content field
-  function ring(rot,op=.05){
-    const geo=new THREE.RingGeometry(275,276.2,128);
-    const mat=new THREE.MeshBasicMaterial({color:0xffffff,transparent:true,opacity:op,side:THREE.DoubleSide,depthWrite:false});
-    const m=new THREE.Mesh(geo,mat);m.rotation.set(...rot);return m;
-  }
-  scene.add(ring([Math.PI/2,0,0],.07),ring([0,Math.PI/2,0],.045),ring([0,0,0],.045));
-
-  raycaster=new THREE.Raycaster();pointer=new THREE.Vector2();
-  let down=null;
-  renderer.domElement.addEventListener('pointerdown',e=>down={x:e.clientX,y:e.clientY});
-  renderer.domElement.addEventListener('pointerup',e=>{
-    if(!down)return;
-    const moved=Math.hypot(e.clientX-down.x,e.clientY-down.y);down=null;
-    if(moved>5)return;
-    const rect=renderer.domElement.getBoundingClientRect();
-    pointer.x=((e.clientX-rect.left)/rect.width)*2-1;
-    pointer.y=-((e.clientY-rect.top)/rect.height)*2+1;
-    raycaster.setFromCamera(pointer,camera);
-    const hits=raycaster.intersectObjects(clickables,false);
-    if(hits.length) inspectNode(hits[0].object.userData.node);
-  });
-
-  resize();
-  animate();
-}
-function renderField(data){
-  currentData=data;clickables=[];
-  nodeGroup.clear();routeGroup.clear();
-
-  // station anchors as subtle, labelled objects
-  for(const [station,pos] of Object.entries(stationPositions)){
-    const radius=station==='Crossroads'?15:11;
-    const geo=new THREE.SphereGeometry(radius,28,20);
-    const mat=new THREE.MeshStandardMaterial({
-      color:colors[station],roughness:.3,metalness:.08,
-      emissive:colors[station],emissiveIntensity:station==='Crossroads'?.42:.16,
-      transparent:true,opacity:.72
-    });
-    const m=new THREE.Mesh(geo,mat);m.position.set(...pos);
-    m.userData={stationAnchor:true,station};
-    nodeGroup.add(m);
-    const lab=makeLabel(station);lab.position.set(pos[0],pos[1]+30,pos[2]);nodeGroup.add(lab);
-  }
-
-  const byId=new Map();
-  for(const n of data.nodes){
-    const geo=new THREE.SphereGeometry(17,30,22);
-    const mat=new THREE.MeshStandardMaterial({
-      color:colors[n.station],roughness:.25,metalness:.1,
-      emissive:colors[n.station],emissiveIntensity:.33
-    });
-    const m=new THREE.Mesh(geo,mat);
-    m.position.set(...n.position);
-    m.userData={node:n};
-    nodeGroup.add(m);clickables.push(m);byId.set(n.id,n);
-    const label=makeLabel(n.label);label.position.set(n.position[0],n.position[1]+36,n.position[2]);nodeGroup.add(label);
-  }
-
-  for(const r of data.routes){
-    const a=byId.get(r.a),b=byId.get(r.b);
-    if(!a||!b)continue;
-    const cross=r.kind==='crossroads';
-    const mesh=makeRoute(a.position,b.position,cross);
-    mesh.userData.kind=r.kind;
-    routeGroup.add(mesh);
-  }
-
-  renderSummary(data);
-}
-function inspectNode(n){
-  const inspect=document.getElementById('inspect');
-  inspect.innerHTML=`
-    <h3>${escapeHtml(n.label)}</h3>
-    <div class="badge" style="color:#${colors[n.station].toString(16).padStart(6,'0')}">${n.station}</div>
-    <div class="detail"><b>What you said:</b><br>${escapeHtml(n.text)}</div>
-    <div class="detail"><b>Why it sits here:</b><br>${stationDescriptions[n.station]}</div>
-    <div class="metrics">
-      <div class="metric"><b>${n.priority}</b><span>priority</span></div>
-      <div class="metric"><b>Q${n.q}</b><span>source reading</span></div>
-    </div>
-    <div class="callout">
-      <b>Next interpretation</b>
-      Rotate the field and inspect the routes touching this node. The point is not that this placement is final; it is that the placement is visible and contestable.
-    </div>`;
-}
-function renderSummary(data){
-  const counts={};
-  for(const s of Object.keys(stationPositions)) counts[s]=0;
-  for(const n of data.nodes) counts[n.station]=(counts[n.station]||0)+1;
-  const active=Object.entries(counts).filter(([k,v])=>v>0);
-  const high=data.nodes.filter(n=>n.priority==='high').length;
-  const cross=data.routes.filter(r=>r.kind==='crossroads').length;
-  const summary=document.getElementById('summary');
-  summary.innerHTML=`
-    <div class="summary-card"><b>${data.nodes.length}</b><span>material nodes</span></div>
-    <div class="summary-card"><b>${active.length}</b><span>active spaces</span></div>
-    <div class="summary-card"><b>${high}</b><span>high-priority nodes</span></div>
-    <div class="summary-card"><b>${cross}</b><span>Crossroads candidates</span></div>`;
-}
-function escapeHtml(s){
-  return s.replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]));
-}
-function resize(){
-  if(!renderer)return;
-  const mount=document.getElementById('three');
-  const r=mount.getBoundingClientRect();
-  renderer.setSize(r.width,r.height,false);
-  camera.aspect=r.width/r.height;camera.updateProjectionMatrix();
-}
-function animate(){
-  requestAnimationFrame(animate);
-  if(controls)controls.update();
-  if(renderer)renderer.render(scene,camera);
-}
-function setView(p){
-  camera.position.set(...p);controls.target.set(0,0,0);controls.update();
-}
-
-document.getElementById('generate').addEventListener('click',()=>{
-  const data=makeFieldData();
-  if(!data.nodes.length){
-    alert('Give the field at least one answer first.');
-    return;
-  }
-  document.getElementById('field').classList.add('active');
-  if(!renderer)initScene();
-  renderField(data);
-  setTimeout(()=>{resize();document.getElementById('field').scrollIntoView({behavior:'smooth'});},80);
-  localStorage.setItem('observatory_shadow_answers',JSON.stringify(
-    Array.from({length:8},(_,i)=>document.getElementById('q'+(i+1)).value)
-  ));
-});
-
-document.getElementById('front').addEventListener('click',()=>setView([0,80,760]));
-document.getElementById('top').addEventListener('click',()=>setView([0,760,120]));
-document.getElementById('side').addEventListener('click',()=>setView([760,90,0]));
-
-document.getElementById('routes').addEventListener('click',()=>{
-  routesMode=!routesMode;crossroadsMode=false;
-  document.getElementById('routes').textContent=routesMode?'Normal routes':'Highlight routes';
-  document.getElementById('crossroads').textContent='Crossroads';
-  for(const r of routeGroup.children){
-    r.material.opacity=routesMode?(r.userData.cross?.98:.82):r.userData.baseOpacity;
-    r.scale.x=r.scale.z=routesMode?(r.userData.cross?1.45:1.3):1;
-  }
-});
-
-document.getElementById('crossroads').addEventListener('click',()=>{
-  crossroadsMode=!crossroadsMode;routesMode=false;
-  document.getElementById('routes').textContent='Highlight routes';
-  document.getElementById('crossroads').textContent=crossroadsMode?'Crossroads active':'Crossroads';
-  for(const r of routeGroup.children){
-    r.material.opacity=crossroadsMode?(r.userData.cross?1:.10):r.userData.baseOpacity;
-    r.scale.x=r.scale.z=crossroadsMode?(r.userData.cross?1.7:1):1;
-  }
-  document.getElementById('inspect').innerHTML=crossroadsMode?`
-    <h3>Crossroads</h3>
-    <div class="badge" style="color:#9bb9ff">transformation candidates</div>
-    <div class="detail">Blue routes mark places where different kinds of material may alter one another's meaning. This is where the field should ask a better question rather than simply assign another task.</div>
-    <div class="callout"><b>Reading rule</b>Crossroads is not a category. It is a relationship.</div>`:
-    '<h3>Inspector</h3><div class="detail">Select a node to inspect it.</div>';
-});
-
-document.getElementById('resetAll').addEventListener('click',()=>{
-  for(let i=1;i<=8;i++)document.getElementById('q'+i).value='';
-  localStorage.removeItem('observatory_shadow_answers');
-  document.getElementById('field').classList.remove('active');
-});
-
-window.addEventListener('resize',resize);
-
-// restore local answers for repeat testing
-try{
-  const saved=JSON.parse(localStorage.getItem('observatory_shadow_answers')||'null');
-  if(Array.isArray(saved))saved.forEach((v,i)=>{const el=document.getElementById('q'+(i+1));if(el)el.value=v||'';});
-}catch(e){}
-</script>
+  <script type="module" src="shadow.js"></script>
 </body>
 </html>
