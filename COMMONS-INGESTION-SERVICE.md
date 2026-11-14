@@ -2,7 +2,7 @@
 
 **Purpose:** give people one low-friction way to contribute raw material to the Commons while establishing the contract for how that material becomes searchable, connected and usable.
 
-This first release uses GitHub Issues as the intake surface. It is an intake protocol and human-operated workflow, **not yet an automated ingestion API or shared knowledge database**. Issue submissions are public in this repository unless GitHub access settings say otherwise. Never submit confidential, personal, commercially sensitive or otherwise restricted material here.
+This release uses GitHub Issues as the intake surface. GitHub Actions preserves source submissions and, when the repository secret `OPENAI_API_KEY` is configured, generates a source-linked AI analysis draft on issue creation. This is an automated first-pass processor, **not yet a searchable shared knowledge database or a deployed ingestion API**. Issue submissions are public in this repository unless GitHub access settings say otherwise. Never submit confidential, personal, commercially sensitive or otherwise restricted material here.
 
 ## 1. The user experience
 
@@ -49,9 +49,9 @@ Derived objects must reference the intake record through explicit provenance rel
 
 ## 5. First implementation boundary
 
-**Included now:** a GitHub Issue Form for low-friction public submissions; this documented intake and processing contract; a stable path from each submission back to its original issue.
+**Included now:** a GitHub Issue Form; append-only preservation snapshots; a readable current source record; and a GitHub Actions step that calls the OpenAI Responses API to create a separate, source-linked Markdown analysis draft on intake creation. The AI step requires the repository Actions secret `OPENAI_API_KEY`; the optional repository variable `OPENAI_MODEL` selects the model, defaulting to `gpt-6-astra`. If the secret is absent, preservation still completes and AI analysis is skipped with a workflow warning.
 
-**Not implemented yet:** a running API endpoint or webhook receiver; automatic issue-to-database ingestion; file parsing / OCR / audio transcription workers; PostgreSQL, object storage, vector search or graph query deployment; automatic AI classification or relationship extraction; authentication, private intake spaces or access-control enforcement beyond GitHub repository permissions.
+**Not implemented yet:** a running API endpoint or webhook receiver; automatic issue-to-database ingestion; attachment downloading or file parsing / OCR / audio transcription workers; PostgreSQL, object storage, vector search or graph query deployment; cross-intake relationship resolution; authenticated private intake spaces or access-control enforcement beyond GitHub repository permissions; human review and approval UI.
 
 Do not describe the service as automated until those components are deployed and tested.
 
@@ -63,13 +63,15 @@ Do not describe the service as automated until those components are deployed and
 4. The processor can produce a structured record without changing the original.
 5. Every extracted claim and proposed relationship links to its source.
 6. Uncertain or conflicting interpretations remain visible and are not silently resolved.
-7. Search can retrieve the material by words, entities and meaning.
+7. The generated analysis is visibly marked as machine-generated and links back to the original issue.
 8. A person can inspect, correct and export the record.
 9. Restricted material is not accepted into a public issue workflow.
 
 ## 7. Next technical step
 
-Implement a small server-side receiver for GitHub issue webhooks. Verify webhook signatures, accept only the intended repository and issue form, fetch the issue through the GitHub API, register an idempotent intake record, and enqueue processing. Do not call an LLM synchronously inside the webhook request. The worker should process asynchronously and report status back to the issue.
+The current GitHub Actions implementation is a first automated processor: the issue event starts the workflow, preservation runs first, and a separate AI step calls the OpenAI Responses API to draft an analysis. It does not execute tools or grant the model repository access. The issue body is treated as untrusted source material, and an existing analysis file is not overwritten.
+
+Next, test this on a fresh intake with the repository Actions secret `OPENAI_API_KEY` configured. Then add an explicit human-review state and structured records for extracted claims, entities, evidence and candidate relationships. A server-side receiver and asynchronous worker become necessary when moving beyond GitHub Actions and repository files.
 
 The first end-to-end proof is one issue becoming one preserved intake record, one searchable object and a set of source-linked extracted claims.
 
@@ -85,4 +87,4 @@ When an issue matching the Commons intake form is opened, edited, reopened or cl
 
 The original GitHub issue remains the canonical source. The Markdown file is a convenience view; JSON snapshots preserve the event payload fields needed for later ingestion. Issue edits create new snapshots rather than overwriting historical ones. Closing an issue also creates a snapshot; it does not delete the preserved contribution.
 
-**Limitations:** this workflow has been committed but its first live run has not yet been verified. It preserves issue text and links, not the binary contents of externally hosted attachments. It does not yet create PostgreSQL records, run AI extraction, build semantic indexes or discover relationships. The repository and its issues are public, so this workflow is only suitable for public-safe contributions.
+**Limitations:** preservation has been verified on live intakes #1 and #2. The automated AI step has been committed but has not yet been verified on a fresh issue with an API key configured. The workflow preserves issue text and links, not binary attachment contents. It does not create PostgreSQL records, semantic indexes or a cross-intake relationship graph. The repository and its issues are public, so this workflow is only suitable for public-safe contributions.
