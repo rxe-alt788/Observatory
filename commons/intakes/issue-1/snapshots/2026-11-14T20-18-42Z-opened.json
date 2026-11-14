@@ -1,0 +1,30 @@
+{
+  "schema_version": "commons-intake-snapshot/1",
+  "source_system": "github_issue",
+  "repository": "rxe-alt788/Observatory",
+  "issue_number": 1,
+  "issue_url": "https://github.com/rxe-alt788/Observatory/issues/1",
+  "event_action": "opened",
+  "received_at": "2026-11-14T20:18:42Z",
+  "source_updated_at": "2026-11-14T20:18:42Z",
+  "preserved_at": "2026-11-14T20:18:48.939Z",
+  "author": {
+    "login": "rxe-alt788",
+    "id": 214649562,
+    "type": "User"
+  },
+  "title": "[Intake]: Test contribution — AI-assisted operational problem solving",
+  "body": "### What are you contributing?\n\nA problem I want help investigating\n\n### Drop the material\n\nI want to understand how a small organisation can identify problems in its operations and use AI to investigate and resolve them. What information would we need to collect?\n\n### Context (optional)\n\nThis is a public test submission to verify the Commons intake and preservation workflow. It contains no private or confidential material.\n\n### What would you like the Commons to do with it?\n\n- Keep and organise it\n- Investigate a question or problem\n- Extract claims, entities, dates or key information\n\n### Is there a question you want answered?\n\nWhat minimum information would let us understand an operational problem, identify its dependencies and propose a practical resolution?\n\n### Public submission check\n\nThis is a deliberately public test contribution.",
+  "state": "open",
+  "labels": [
+    "commons-intake"
+  ],
+  "milestone": null,
+  "assignees": [],
+  "attachments_and_links": [],
+  "provenance": {
+    "github_event": "opened",
+    "issue_node_id": "I_kwDOTy9MlM8AAAABfTLvGQ",
+    "issue_id": 6395457305
+  }
+}
