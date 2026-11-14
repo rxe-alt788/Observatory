@@ -91,7 +91,10 @@ export default {
       return response({ error: "Invalid JSON." }, 400, allowedOrigin);
     }
 
-    if (!env.OPENAI_API_KEY || !env.OPENAI_MODEL || !env.TURNSTILE_SECRET) {\n      return response({ error: "Clive gateway is not fully configured yet." }, 503, allowedOrigin);\n    }\n    if (!await verifyTurnstile(body.turnstileToken, ip, env.TURNSTILE_SECRET)) {
+    if (!env.OPENAI_API_KEY || !env.OPENAI_MODEL || !env.TURNSTILE_SECRET) {
+      return response({ error: "Clive gateway is not fully configured yet." }, 503, allowedOrigin);
+    }
+    if (!await verifyTurnstile(body.turnstileToken, ip, env.TURNSTILE_SECRET)) {
       return response({ error: "Please complete the visitor check and try again." }, 403, allowedOrigin);
     }
     if (!validMessages(body.messages)) {
