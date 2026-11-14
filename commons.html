@@ -95,5 +95,22 @@
  <section class="panel"><h3>Local data</h3><p>This build stores content in browser local storage. It is not yet synchronised between participants or devices.</p><button class="secondary danger" id="clearLocal">Clear local data</button></section>
 </aside>
 </div>
-<script type="module" src="commons.js"></script>
+<section id="clive-gate" aria-label="First arrival configuration">
+ <div class="clive-shell">
+  <div class="clive-top"><span>THE COMMONS</span><span>FIRST ARRIVAL · FLIGHT CHECK</span></div>
+  <div class="clive-intro">
+   <div class="clive-avatar" aria-hidden="true">C</div>
+   <div><div class="clive-name">CLIVE <span>· YOUR GUIDE</span></div><div class="clive-status">Present and paying attention</div></div>
+  </div>
+  <div class="clive-speech"><div class="clive-eyebrow">CLIVE SAYS</div><h1>Before you wander in, let's set a few things.</h1><p>“This place can work in different ways. These dials tell me how to work alongside you. You're in charge. I'm just here to keep the machinery honest.”</p></div>
+  <div class="clive-controls">
+   <label class="clive-control"><span><b>01 · MEMORY</b><output id="clive-memory-value">3 / 5</output></span><small>How much of your previous work should I carry forward?</small><input id="clive-memory" type="range" min="0" max="5" value="3"><span class="clive-scale"><small>Clean slate</small><small>Deep recall</small></span><em id="clive-memory-desc">Retain useful context without assuming everything remains relevant.</em></label>
+   <label class="clive-control"><span><b>02 · CREATIVE FREEDOM</b><output id="clive-creativity-value">3 / 5</output></span><small>How far may I range beyond the immediate instruction?</small><input id="clive-creativity" type="range" min="0" max="5" value="3"><span class="clive-scale"><small>Stay close</small><small>Explore</small></span><em id="clive-creativity-desc">Explore alternatives and connections when they have merit.</em></label>
+   <label class="clive-control"><span><b>03 · INITIATIVE</b><output id="clive-initiative-value">2 / 5</output></span><small>How much should I do without waiting for a direct instruction?</small><input id="clive-initiative" type="range" min="0" max="5" value="2"><span class="clive-scale"><small>Wait</small><small>Act</small></span><em id="clive-initiative-desc">Offer useful suggestions and flag relevant opportunities.</em></label>
+  </div>
+  <div class="clive-readback"><div class="clive-eyebrow">CLIVE'S READBACK</div><p id="clive-readback">“I'll retain useful context without assuming every old detail matters. I'll explore a little beyond the obvious, and offer suggestions when something looks worth your attention.”</p><button type="button" id="clive-speak" class="clive-hear">▶ Hear Clive</button></div>
+  <div class="clive-bottom"><span>Your settings are saved in this browser. You can retune them later.</span><button id="clive-enter" type="button">SET MY NODES · ENTER THE COMMONS ↗</button></div>
+ </div>
+</section>
+<link rel="stylesheet" href="clive.css"><script type="module" src="commons.js"></script><script type="module" src="clive.js"></script>
 </body></html>
