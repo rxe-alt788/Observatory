@@ -35,3 +35,12 @@ The repository is an active prototype rather than a packaged product. Experiment
 - Interface: `commons.html`, `commons.css`, `commons.js`
 
 The fixed Observatory region coordinates are preserved. The current browser build supports local artefacts, local identity registration, spatial navigation and direct invocation of an OpenAI-compatible model endpoint. It is a local-first prototype; multi-user persistence, authentication, shared presence and server-side secret management remain production requirements.
+
+
+## Commons intake
+
+People can contribute raw material through the public [Commons intake issue form](https://github.com/rxe-alt788/Observatory/issues/new?template=commons-intake.yml). It accepts thoughts, questions, source links and public-safe excerpts without requiring contributors to organise them first.
+
+- Intake and processing contract: [COMMONS-INGESTION-SERVICE.md](COMMONS-INGESTION-SERVICE.md)
+- **Current status:** GitHub issue intake and documentation only. Automated webhook processing, storage, indexing and AI enrichment are not deployed.
+- **Privacy:** GitHub issues in this repository are public. Do not submit confidential or personal material.
