@@ -31,6 +31,7 @@ The repository is an active prototype rather than a packaged product. Experiment
 
 - Live interface: https://rxe-alt788.github.io/Observatory/commons.html
 - Product and spatial architecture: [COMMONS-ARCHITECTURE.md](COMMONS-ARCHITECTURE.md)
+- Shared backend and sovereignty contract: [COMMONS-BACKEND-CONTRACT.md](COMMONS-BACKEND-CONTRACT.md)
 - Interface: `commons.html`, `commons.css`, `commons.js`
 
 The fixed Observatory region coordinates are preserved. The current browser build supports local artefacts, local identity registration, spatial navigation and direct invocation of an OpenAI-compatible model endpoint. It is a local-first prototype; multi-user persistence, authentication, shared presence and server-side secret management remain production requirements.
