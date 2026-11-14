@@ -1,0 +1,81 @@
+name: Commons intake
+description: Drop material, a question or a problem into the Commons. You do not need to organise it first.
+title: "[Intake]: "
+labels: ["commons-intake"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## Put your material here
+
+        Paste thoughts, notes, excerpts, links or a description of the material you want to contribute. You do not need to know where it belongs.
+
+        **Important:** this repository's issues are public. Do not include private emails, personal information, passwords, confidential work, copyrighted full-text material you do not have permission to share, or anything you would not publish openly. Share a public link or a redacted excerpt instead.
+  - type: dropdown
+    id: material_type
+    attributes:
+      label: What are you contributing?
+      description: Choose the closest fit. This is only an initial hint.
+      options:
+        - A thought, observation or question
+        - A problem I want help investigating
+        - An article, webpage or research paper
+        - An email or conversation excerpt (redacted)
+        - A document or report
+        - Data, spreadsheet or dataset
+        - Code or technical material
+        - Audio, image or other media
+        - A collection of mixed material
+        - Something else
+    validations:
+      required: true
+  - type: textarea
+    id: raw_material
+    attributes:
+      label: Drop the material
+      description: Paste the material, relevant excerpt, notes or source links. For large files, explain what they contain and attach only material suitable for public release.
+      placeholder: |
+        Paste or describe the material here.
+        Add source URLs where possible.
+      render: markdown
+    validations:
+      required: true
+  - type: textarea
+    id: context
+    attributes:
+      label: Context (optional)
+      description: Where did this come from? What should we know to understand it?
+      placeholder: A little background, who/what it concerns, dates, or why it matters.
+    validations:
+      required: false
+  - type: dropdown
+    id: requested_treatment
+    attributes:
+      label: What would you like the Commons to do with it?
+      description: Select the closest starting point. This is only an initial hint.
+      multiple: true
+      options:
+        - Keep and organise it
+        - Find related material and connections
+        - Compare sources or alternatives
+        - Summarise what it says
+        - Investigate a question or problem
+        - Extract claims, entities, dates or key information
+        - I am just contributing it for now
+    validations:
+      required: false
+  - type: textarea
+    id: question
+    attributes:
+      label: Is there a question you want answered?
+      description: Optional. What should someone be able to discover by examining this material?
+      placeholder: What connects these sources? What changed? What is missing? What can be established?
+    validations:
+      required: false
+  - type: checkboxes
+    id: public_confirmation
+    attributes:
+      label: Public submission check
+      options:
+        - label: I understand this issue and its contents are publicly visible, and I have removed or withheld private or restricted information.
+          required: true
