@@ -97,6 +97,7 @@ async function invokeModel(){
  }catch(err){state.messages.push({id:uid(),role:'system',content:'Invocation failed: '+err.message,createdAt:stamp()});$('modelStatus').textContent='Invocation failed: '+err.message+'. Check endpoint, service and CORS.';$('modelStatusSide').textContent='Invocation failed: '+err.message+'.';save()}
 }
 function addInhabitant(){const name=$('inhabitantName').value.trim();if(!name)return;state.inhabitants.push({id:uid(),name,kind:$('inhabitantKind').value,about:$('inhabitantAbout').value.trim(),status:'registered',createdAt:stamp()});$('inhabitantName').value='';$('inhabitantAbout').value='';save()}
+function saveSideModelConfig(){state.config={endpoint:$('modelEndpointSide').value.trim(),model:$('modelNameSide').value.trim(),apiKey:$('apiKeySide').value};save();$('modelStatusSide').textContent='Connection saved in this browser.';$('modelStatus').textContent='Connection saved in this browser.'}
 function wire(){
  document.querySelectorAll('[data-view]').forEach(b=>b.addEventListener('click',()=>setView(b.dataset.view)));
  document.querySelectorAll('[data-open-station]').forEach(b=>b.addEventListener('click',()=>setView(b.dataset.openStation)));
