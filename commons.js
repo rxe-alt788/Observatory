@@ -92,7 +92,7 @@ async function invokeModel(){
  const gate=$('turnstile-widget');
  if(!window.turnstile){$('modelStatus').textContent='Security check is loading. Try again in a moment.';return}
  if(!window.__commonsTurnstileId){
-  window.__commonsTurnstileId=window.turnstile.render(gate,{sitekey:'0x4AAAAAAGBS2oDYYMACTwsk-Cg_hniYoaE',theme:'dark'});
+  window.__commonsTurnstileId=window.turnstile.render(gate,{sitekey:'0x4AAAAAAGBS2hmnZ9WIaEkn',theme:'dark'});
  }
  const token=window.turnstile.getResponse(window.__commonsTurnstileId);
  if(!token){$('modelStatus').textContent='Complete the security check before invoking Clive.';return}
