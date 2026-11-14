@@ -72,3 +72,17 @@ Do not describe the service as automated until those components are deployed and
 Implement a small server-side receiver for GitHub issue webhooks. Verify webhook signatures, accept only the intended repository and issue form, fetch the issue through the GitHub API, register an idempotent intake record, and enqueue processing. Do not call an LLM synchronously inside the webhook request. The worker should process asynchronously and report status back to the issue.
 
 The first end-to-end proof is one issue becoming one preserved intake record, one searchable object and a set of source-linked extracted claims.
+
+## 8. Preservation implementation
+
+The repository now contains `.github/workflows/preserve-commons-intake.yml`.
+
+When an issue matching the Commons intake form is opened, edited, reopened or closed, GitHub Actions:
+- captures the issue title, exact body, issue URL and number, contributor identity, timestamps, state, labels and source links;
+- writes an event snapshot to `commons/intakes/issue-N/snapshots/`;
+- maintains `commons/intakes/issue-N/current.md` as a readable view of the latest issue state;
+- keeps historical snapshots append-only and makes retries of the same event idempotent.
+
+The original GitHub issue remains the canonical source. The Markdown file is a convenience view; JSON snapshots preserve the event payload fields needed for later ingestion. Issue edits create new snapshots rather than overwriting historical ones. Closing an issue also creates a snapshot; it does not delete the preserved contribution.
+
+**Limitations:** this workflow has been committed but its first live run has not yet been verified. It preserves issue text and links, not the binary contents of externally hosted attachments. It does not yet create PostgreSQL records, run AI extraction, build semantic indexes or discover relationships. The repository and its issues are public, so this workflow is only suitable for public-safe contributions.
