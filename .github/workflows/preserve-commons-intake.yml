@@ -52,7 +52,7 @@ jobs:
               labels: (issue.labels ?? []).map(label => typeof label === "string" ? label : label.name),
               milestone: issue.milestone?.title ?? null,
               assignees: (issue.assignees ?? []).map(user => user.login),
-              attachments_and_links: [...new Set((issue.body ?? "").split(/\\s+/).filter(value => value.startsWith("https://") || value.startsWith("http://")).map(value => value.replace(/[),.;]+$/, "")))],
+              attachments_and_links: [...new Set((issue.body ?? "").split(/\s+/).filter(value => value.startsWith("https://") || value.startsWith("http://")).map(value => value.replace(/[),.;]+$/, "")))],
               provenance: {
                 github_event: action,
                 issue_node_id: issue.node_id,
