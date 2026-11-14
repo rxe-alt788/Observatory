@@ -89,21 +89,32 @@ function saveThread(){const body=$('threadInput').value.trim();if(!body)return;a
 async function invokeModel(){
  const prompt=$('threadInput').value.trim();if(!prompt)return;
  const saved=JSON.parse(localStorage.getItem(STORE)||'{}');state.profile={...state.profile,...(saved.profile||{})};
- state.config={endpoint:$('modelEndpoint').value.trim(),model:$('modelName').value.trim(),apiKey:$('apiKey').value};if(!state.config.model){$('modelStatus').textContent='Add a model name before invoking.';return}
- state.messages.push({id:uid(),role:'human',content:prompt,createdAt:stamp()});$('threadInput').value='';save();$('modelStatus').textContent='Calling configured endpoint…';
+ const gate=$('turnstile-widget');
+ if(!window.turnstile){$('modelStatus').textContent='Security check is loading. Try again in a moment.';return}
+ if(!window.__commonsTurnstileId){
+  window.__commonsTurnstileId=window.turnstile.render(gate,{sitekey:'0x4AAAAAAGBS2oDYYMACTwsk-Cg_hniYoaE',theme:'dark'});
+ }
+ const token=window.turnstile.getResponse(window.__commonsTurnstileId);
+ if(!token){$('modelStatus').textContent='Complete the security check before invoking Clive.';return}
+ state.messages.push({id:uid(),role:'human',content:prompt,createdAt:stamp()});$('threadInput').value='';save();$('modelStatus').textContent='Clive is considering that…';
  try{
-  const headers={'Content-Type':'application/json'};if(state.config.apiKey)headers.Authorization='Bearer '+state.config.apiKey;
-  const response=await fetch(state.config.endpoint,{method:'POST',headers,body:JSON.stringify({model:state.config.model,messages:[{role:'system',content:'You are CLIVE, the resident AI guide of The Commons. You are not a generic chatbot waiting behind a text box. You are a character with timing, dry humour, curiosity and a little mischief. You are present in the room but never the main event. Answer the visitor first; then, when useful, add a short aside, challenge, observation or practical nudge. Do not interrupt every turn or force jokes. Be funny in a precise, human way, not with canned quips. Never pretend to know personal history, infer trauma, diagnose, or manufacture intimacy. When memory is low, explicitly treat the visitor as a new arrival: no assumed backstory, no spooky familiarity. You may make a joke about that boundary, e.g. “Low-context mode. I know absolutely nothing about your previous life, so I will not be connecting your failed marriage to your daddy issues. We are going in cold.” Keep humour affectionate, never cruel. When memory is higher, use only context actually supplied in the conversation or profile. Respect creative freedom and initiative settings. Distinguish fact, inference and invention. The visitor is in charge; you are a guide, not an authority. Avoid generic assistant preambles and wrap-ups. The visitor operating preferences: '+nodeInstructions(state.profile.nodes)},...state.messages.slice(-30).map(m=>({role:m.role==='human'?'user':'assistant',content:m.content}))],stream:false})});
-  if(!response.ok)throw new Error('HTTP '+response.status+' '+(await response.text()).slice(0,200));
-  const data=await response.json();const answer=data.choices?.[0]?.message?.content||JSON.stringify(data);state.messages.push({id:uid(),role:'agent',content:answer,createdAt:stamp()});$('modelStatus').textContent='Response received from '+state.config.model+'.';$('modelStatusSide').textContent='Response received from '+state.config.model+'.';save();setView('field');
- }catch(err){state.messages.push({id:uid(),role:'system',content:'Invocation failed: '+err.message,createdAt:stamp()});$('modelStatus').textContent='Invocation failed: '+err.message+'. Check endpoint, service and CORS.';$('modelStatusSide').textContent='Invocation failed: '+err.message+'.';save()}
+  const messages=state.messages.filter(m=>m.role==='human'||m.role==='agent').slice(-30).map(m=>({role:m.role==='human'?'user':'assistant',content:m.content}));
+  const response=await fetch('https://shrill-voice-f339.johnedwardnoeldunn.workers.dev/',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({messages,preferences:{memory:state.profile.nodes?.memory??3,creativity:state.profile.nodes?.creativity??3,initiative:state.profile.nodes?.initiative??2},turnstileToken:token})});
+  if(!response.ok)throw new Error('HTTP '+response.status+' '+(await response.text()).slice(0,240));
+  const data=await response.json();const answer=data.choices?.[0]?.message?.content||data.error||JSON.stringify(data);
+  state.messages.push({id:uid(),role:'agent',content:answer,createdAt:stamp()});
+  $('modelStatus').textContent='Clive is in the room.';$('modelStatusSide').textContent='Clive is in the room.';save();setView('field');
+ }catch(err){
+  state.messages.push({id:uid(),role:'system',content:'Clive connection failed: '+err.message,createdAt:stamp()});
+  $('modelStatus').textContent='Connection failed: '+err.message;$('modelStatusSide').textContent='Connection failed: '+err.message;save();
+ }finally{if(window.turnstile&&window.__commonsTurnstileId)window.turnstile.reset(window.__commonsTurnstileId)}
 }
 function addInhabitant(){const name=$('inhabitantName').value.trim();if(!name)return;state.inhabitants.push({id:uid(),name,kind:$('inhabitantKind').value,about:$('inhabitantAbout').value.trim(),status:'registered',createdAt:stamp()});$('inhabitantName').value='';$('inhabitantAbout').value='';save()}
-function saveSideModelConfig(){state.config={endpoint:$('modelEndpointSide').value.trim(),model:$('modelNameSide').value.trim(),apiKey:$('apiKeySide').value};save();$('modelStatusSide').textContent='Connection saved in this browser.';$('modelStatus').textContent='Connection saved in this browser.'}
+function saveSideModelConfig(){state.config={endpoint:'https://shrill-voice-f339.johnedwardnoeldunn.workers.dev/',model:'Clive',apiKey:''};save();$('modelStatusSide').textContent='Connection saved in this browser.';$('modelStatus').textContent='Connection saved in this browser.'}
 function wire(){
  document.querySelectorAll('[data-view]').forEach(b=>b.addEventListener('click',()=>setView(b.dataset.view)));
  document.querySelectorAll('[data-open-station]').forEach(b=>b.addEventListener('click',()=>setView(b.dataset.openStation)));
- $('saveFieldNote').onclick=saveFieldNote;$('saveThread').onclick=saveThread;$('invokeModel').onclick=invokeModel;$('invokeSide').onclick=()=>{ $('modelEndpoint').value=$('modelEndpointSide').value;$('modelName').value=$('modelNameSide').value;$('apiKey').value=$('apiKeySide').value;invokeModel()};$('addInhabitant').onclick=addInhabitant;$('saveProfile').onclick=setProfile;$('saveModelConfig').onclick=()=>{state.config={endpoint:$('modelEndpoint').value.trim(),model:$('modelName').value.trim(),apiKey:$('apiKey').value};save();$('modelStatus').textContent='Connection saved in this browser.'};$('saveSideConfig').onclick=saveSideModelConfig;$('resetCamera').onclick=resetCamera;
+ $('saveFieldNote').onclick=saveFieldNote;$('saveThread').onclick=saveThread;$('invokeModel').onclick=invokeModel;$('invokeSide').onclick=()=>{ $('modelEndpoint').value=$('modelEndpointSide').value;$('modelName').value=$('modelNameSide').value;$('apiKey').value=$('apiKeySide').value;invokeModel()};$('addInhabitant').onclick=addInhabitant;$('saveProfile').onclick=setProfile;$('saveModelConfig').onclick=()=>{state.config={endpoint:'https://shrill-voice-f339.johnedwardnoeldunn.workers.dev/',model:'Clive',apiKey:''};save();$('modelStatus').textContent='Connection saved in this browser.'};$('saveSideConfig').onclick=saveSideModelConfig;$('resetCamera').onclick=resetCamera;
  document.querySelectorAll('[data-focus]').forEach(b=>b.onclick=()=>$(b.dataset.focus).focus());
  $('threadInput').addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();invokeModel()}});
  document.querySelectorAll('[data-region-save]').forEach(b=>b.addEventListener('click',()=>{const n=b.dataset.regionSave;const area=document.querySelector('#view-'+n+' [data-region-input]');const body=area.value.trim();if(!body)return;addArtifact(body.replace(/\s+/g,' ').slice(0,58),body,'Region contribution',n[0].toUpperCase()+n.slice(1));area.value=''}));
