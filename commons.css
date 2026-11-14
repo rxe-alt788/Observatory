@@ -15,3 +15,20 @@ main{padding:28px clamp(18px,3vw,44px) 55px;min-width:0}.topbar{display:flex;ali
 @media(max-width:1160px){.app{grid-template-columns:190px minmax(0,1fr)}.right{grid-column:2;position:static;height:auto;border-left:0;border-top:1px solid var(--line);display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}.right .inspector-panel{grid-column:1/-1}}
 @media(max-width:760px){.app{display:block}.rail{height:auto;position:relative;padding:12px;border-right:0;border-bottom:1px solid var(--line);gap:12px}.brand{padding:3px 5px}.navgroup.primarynav{display:flex;overflow:auto;gap:4px}.navgroup.primarynav .navlabel{display:none}.navitem{white-space:nowrap;width:auto;padding:8px 10px}.navitem .symbol{display:none}.navgroup.secondarynav{display:flex;overflow:auto}.navgroup.secondarynav .navlabel{display:none}.navgroup.secondarynav .navitem{font-size:10px}.railfoot{display:none}main{padding:19px 13px 35px}.hero{padding:23px 0 13px}.hero h1{font-size:42px}.mapframe{height:58vh;min-height:410px}.right{display:grid;grid-template-columns:1fr;padding:12px}.right .inspector-panel{grid-column:auto}.twocol,.threecol,.formgrid{grid-template-columns:1fr}.formgrid .wide{grid-column:auto}.viewhead{align-items:start;flex-direction:column}.topbar{align-items:flex-start}.top-actions{flex-wrap:wrap;justify-content:end}.footer{display:block}.footer span{display:block;margin-bottom:4px}}
 @media(prefers-reduced-motion:reduce){*,*:before,*:after{scroll-behavior:auto!important;transition:none!important}}
+
+/* Clive is a presence in the room, not another generic chat bubble. */
+.conversation{gap:13px;padding:3px}
+.message{max-width:88%;padding:13px 15px;border-radius:13px;animation:message-arrive .24s ease-out}
+.message.human{justify-self:end;background:#17242b;border-color:#3b5058;border-bottom-right-radius:3px}
+.message.clive-message{justify-self:start;max-width:94%;background:linear-gradient(145deg,#202d31,#111c22);border-color:#778b69;border-left:3px solid var(--acid);border-bottom-left-radius:3px;box-shadow:0 8px 28px rgba(0,0,0,.18)}
+.message-head{display:flex;align-items:center;gap:9px;margin-bottom:9px}
+.message-mark{width:28px;height:28px;flex:0 0 28px;display:grid;place-items:center;border:1px solid #87976c;border-radius:9px;background:#29382d;color:#d7f28b;font:700 15px Georgia,serif}
+.message.human .message-mark{border-color:#526773;background:#263640;color:#b7d8e4}
+.message .role{margin:0;color:#b5c98a;font-size:9px;letter-spacing:.16em}
+.message.human .role{color:#9fc6d4}
+.message-time{font-size:9px;color:#718087;margin-top:1px}
+.message-copy{white-space:pre-wrap;font-size:13px;line-height:1.7;color:#e4e9df}
+.message.system{max-width:100%;border-style:dashed;background:#191613}
+.message.system .role{color:var(--orange)}
+@keyframes message-arrive{from{opacity:0;transform:translateY(7px)}to{opacity:1;transform:translateY(0)}}
+@media(max-width:760px){.message,.message.clive-message{max-width:100%}}
