@@ -3,7 +3,7 @@ main = "index.js"
 compatibility_date = "2026-11-15"
 
 [vars]
-OPENAI_MODEL = "gpt-6-mini"
+OPENAI_MODEL = "gpt-6-astra"
 ALLOWED_ORIGIN = "https://rxe-alt788.github.io"
 
 [[unsafe.bindings]]
