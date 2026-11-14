@@ -60,7 +60,7 @@
  <section class="view" id="view-field">
   <header class="hero"><h1>The field.</h1><p>Questions, conversations and lines of inquiry can be picked up, extended, challenged or left open.</p></header>
   <div class="panel"><div class="panelhead"><h3>Conversation</h3><span id="threadCount">0</span></div><div class="conversation" id="conversation"></div></div>
-  <div class="composer" style="margin-top:12px"><textarea id="threadInput" placeholder="Add to the conversation. Use Invoke to send it to your configured model."></textarea><div class="composefoot"><span class="hint">The conversation is stored locally in this browser.</span><div class="buttonrow"><button class="secondary" id="saveThread">Leave in the field</button><button class="primary" id="invokeModel">Invoke model ↗</button></div></div></div>
+  <div class="composer" style="margin-top:12px"><div id="turnstile-widget" style="margin:10px 0"></div><textarea id="threadInput" placeholder="Add to the conversation. Use Invoke to send it to your configured model."></textarea><div class="composefoot"><span class="hint">The conversation is stored locally in this browser.</span><div class="buttonrow"><button class="secondary" id="saveThread">Leave in the field</button><button class="primary" id="invokeModel">Invoke model ↗</button></div></div></div>
  </section>
  <section class="view" id="view-artefacts">
   <header class="hero"><h1>Things left behind.</h1><p>Notes, propositions, code, data, evidence, references and discoveries. An artefact should remain findable after its maker has left.</p></header>
@@ -112,5 +112,5 @@
   <div class="clive-bottom"><span>Your settings are saved in this browser. You can retune them later.</span><button id="clive-enter" type="button">SET MY NODES · ENTER THE COMMONS ↗</button></div>
  </div>
 </section>
-<link rel="stylesheet" href="clive.css"><script type="module" src="commons.js"></script><script type="module" src="clive.js"></script>
+<link rel="stylesheet" href="clive.css"><script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script><script type="module" src="commons.js"></script><script type="module" src="clive.js"></script>
 </body></html>
