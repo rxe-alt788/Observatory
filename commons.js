@@ -41,7 +41,7 @@ function showInspector(item){
  $('inspectorContent').innerHTML=`<div class="inspector-kind">${esc(item.kind||'Object')}</div><h3 class="inspector-title">${esc(item.title||'Untitled')}</h3><div class="inspector-body">${esc(item.body||'')}</div>${item.meta?.length?`<div class="inspector-section"><h4>Record</h4><div class="taglist">${item.meta.map(x=>`<span class="tag">${esc(x)}</span>`).join('')}</div></div>`:''}${item.extra||''}`;
 }
 function renderStation(name){
- const s=STATIONS[name];if(!s)return;
+ const key=name[0].toUpperCase()+name.slice(1);const s=STATIONS[key];if(!s)return;
  const root=$('view-'+name);if(!root||!root.querySelector('[data-station-title]'))return;
  root.style.setProperty('--station',s.css);
  root.querySelector('[data-station-title]').textContent=s.label;
@@ -49,7 +49,7 @@ function renderStation(name){
  root.querySelector('[data-station-purpose]').textContent=s.purpose;
  root.querySelector('[data-station-question]').textContent=s.question;
  root.querySelector('[data-station-description]').textContent=s.description;
- const records=state.artifacts.filter(a=>a.station===name);
+ const records=state.artifacts.filter(a=>a.station===key);
  root.querySelector('[data-station-records]').innerHTML=records.length?records.map(a=>`<article class="record"><h4>${esc(a.title)}</h4><p>${esc(a.body)}</p><div class="recordmeta"><span>${esc(a.kind)}</span><span>${niceDate(a.createdAt)}</span></div></article>`).join(''):'<div class="empty">This region is open. Add a first artefact from the field.</div>';
 }
 function initMap(){
@@ -78,7 +78,8 @@ function initMap(){
 }
 function onMapPointer(e){const rect=renderer.domElement.getBoundingClientRect();mouse.x=((e.clientX-rect.left)/rect.width)*2-1;mouse.y=-((e.clientY-rect.top)/rect.height)*2+1;raycaster.setFromCamera(mouse,camera);const hits=raycaster.intersectObjects(rayTargets,false);if(hits.length){const name=hits[0].object.parent.userData.station;selectStation(name)}}
 function selectStation(name){selected=name;const s=STATIONS[name];showInspector({kind:'Observatory region',title:s.label,body:s.description,meta:[s.purpose,'Coordinates '+s.position.join(', ')]});setView(name.toLowerCase())}
-function moveMap(view){if(!renderer)return;const target=$(view==='observatory'?'map3d-copy':'map3d');if(target&&renderer.domElement.parentElement!==target)target.appendChild(renderer.domElement);resizeMap()}\nfunction resizeMap(){if(!renderer)return;const mount=renderer.domElement.parentElement;const r=mount.getBoundingClientRect();if(!r.width||!r.height)return;renderer.setSize(r.width,r.height,false);camera.aspect=r.width/r.height;camera.updateProjectionMatrix()}
+function moveMap(view){if(!renderer)return;const target=$(view==='observatory'?'map3d-copy':'map3d');if(target&&renderer.domElement.parentElement!==target)target.appendChild(renderer.domElement);resizeMap()}
+function resizeMap(){if(!renderer)return;const mount=renderer.domElement.parentElement;const r=mount.getBoundingClientRect();if(!r.width||!r.height)return;renderer.setSize(r.width,r.height,false);camera.aspect=r.width/r.height;camera.updateProjectionMatrix()}
 function animate(){requestAnimationFrame(animate);controls?.update();renderer?.render(scene,camera)}
 function resetCamera(){camera.position.set(460,350,620);controls.target.set(0,0,0);controls.update()}
 function setProfile(){const n=$('profileName').value.trim();if(!n)return;state.profile={name:n,kind:$('profileKind').value};save()}
@@ -101,7 +102,8 @@ function wire(){
  document.querySelectorAll('[data-open-station]').forEach(b=>b.addEventListener('click',()=>setView(b.dataset.openStation)));
  $('saveFieldNote').onclick=saveFieldNote;$('saveThread').onclick=saveThread;$('invokeModel').onclick=invokeModel;$('invokeSide').onclick=()=>{ $('modelEndpoint').value=$('modelEndpointSide').value;$('modelName').value=$('modelNameSide').value;$('apiKey').value=$('apiKeySide').value;invokeModel()};$('addInhabitant').onclick=addInhabitant;$('saveProfile').onclick=setProfile;$('saveModelConfig').onclick=()=>{state.config={endpoint:$('modelEndpoint').value.trim(),model:$('modelName').value.trim(),apiKey:$('apiKey').value};save();$('modelStatus').textContent='Connection saved in this browser.'};$('saveSideConfig').onclick=saveSideModelConfig;$('resetCamera').onclick=resetCamera;
  document.querySelectorAll('[data-focus]').forEach(b=>b.onclick=()=>$(b.dataset.focus).focus());
- $('threadInput').addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();invokeModel()}});\n document.querySelectorAll('[data-region-save]').forEach(b=>b.addEventListener('click',()=>{const n=b.dataset.regionSave;const area=document.querySelector('#view-'+n+' [data-region-input]');const body=area.value.trim();if(!body)return;addArtifact(body.replace(/\\s+/g,' ').slice(0,58),body,'Region contribution',n[0].toUpperCase()+n.slice(1));area.value=''}));
+ $('threadInput').addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();invokeModel()}});
+ document.querySelectorAll('[data-region-save]').forEach(b=>b.addEventListener('click',()=>{const n=b.dataset.regionSave;const area=document.querySelector('#view-'+n+' [data-region-input]');const body=area.value.trim();if(!body)return;addArtifact(body.replace(/\s+/g,' ').slice(0,58),body,'Region contribution',n[0].toUpperCase()+n.slice(1));area.value=''}));
  $('clearLocal').onclick=()=>{if(!confirm('Clear all Commons data stored in this browser? This cannot be undone.'))return;localStorage.removeItem(STORE);location.reload()};
 }
 function start(){wire();renderAll();ORDER.forEach(n=>renderStation(n.toLowerCase()));initMap();showInspector({kind:'Welcome',title:'The Commons',body:'A shared environment for human and digital intelligence. Select a region in the field, or leave an artefact. This prototype currently stores data in this browser.'});}
