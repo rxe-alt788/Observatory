@@ -42,7 +42,7 @@ function showInspector(item){
 }
 function renderStation(name){
  const s=STATIONS[name];if(!s)return;
- const root=$('view-'+name);if(!root)return;
+ const root=$('view-'+name);if(!root||!root.querySelector('[data-station-title]'))return;
  root.style.setProperty('--station',s.css);
  root.querySelector('[data-station-title]').textContent=s.label;
  root.querySelector('[data-station-icon]').textContent=s.icon;
