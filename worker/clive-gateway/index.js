@@ -91,7 +91,7 @@ export default {
       return response({ error: "Invalid JSON." }, 400, allowedOrigin);
     }
 
-    if (!await verifyTurnstile(body.turnstileToken, ip, env.TURNSTILE_SECRET)) {
+    if (!env.OPENAI_API_KEY || !env.OPENAI_MODEL || !env.TURNSTILE_SECRET) {\n      return response({ error: "Clive gateway is not fully configured yet." }, 503, allowedOrigin);\n    }\n    if (!await verifyTurnstile(body.turnstileToken, ip, env.TURNSTILE_SECRET)) {
       return response({ error: "Please complete the visitor check and try again." }, 403, allowedOrigin);
     }
     if (!validMessages(body.messages)) {
@@ -112,13 +112,13 @@ export default {
           "content-type": "application/json"
         },
         body: JSON.stringify({
-          model: env.OPENAI_MODEL || "gpt-6-mini",
+          model: env.OPENAI_MODEL,
           messages: [
             { role: "system", content: SYSTEM_PROMPT + "\\n\\n" + preferenceNote },
             ...body.messages
           ],
           stream: false,
-          max_tokens: 1200
+          max_completion_tokens: 1200
         })
       });
       const result = await upstream.text();
