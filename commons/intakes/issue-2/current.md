@@ -4,10 +4,10 @@
 - **Original issue:** https://github.com/rxe-alt788/Observatory/issues/2
 - **Contributor:** @rxe-alt788
 - **Received:** 2026-11-14T20:31:52Z
-- **Last updated:** 2026-11-14T20:31:52Z
-- **Issue state:** open
-- **Preserved event:** opened
-- **Snapshot:** [2026-11-14T20-31-52Z-opened.json](snapshots/2026-11-14T20-31-52Z-opened.json)
+- **Last updated:** 2026-11-14T22:05:57Z
+- **Issue state:** closed
+- **Preserved event:** closed
+- **Snapshot:** [2026-11-14T22-05-57Z-closed.json](snapshots/2026-11-14T22-05-57Z-closed.json)
 
 ## Original submitted material
 
