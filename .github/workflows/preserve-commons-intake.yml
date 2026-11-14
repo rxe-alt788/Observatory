@@ -1,0 +1,121 @@
+name: Preserve Commons intake issues
+
+on:
+  issues:
+    types: [opened, edited, reopened, closed]
+
+permissions:
+  contents: write
+  issues: read
+
+concurrency:
+  group: commons-intake-${{ github.event.issue.number }}
+  cancel-in-progress: false
+
+jobs:
+  preserve:
+    if: startsWith(github.event.issue.title, '[Intake]:') || contains(toJSON(github.event.issue.labels), 'commons-intake')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Preserve source issue and event snapshot
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const issue = context.payload.issue;
+            const repo = context.repo;
+            const number = issue.number;
+            const receivedAt = issue.created_at;
+            const updatedAt = issue.updated_at;
+            const action = context.payload.action;
+            const stamp = updatedAt.replace(/[:.]/g, '-');
+            const snapshotPath = `commons/intakes/issue-${number}/snapshots/${stamp}-${action}.json`;
+            const currentPath = `commons/intakes/issue-${number}/current.md`;
+
+            const snapshot = {
+              schema_version: "commons-intake-snapshot/1",
+              source_system: "github_issue",
+              repository: `${repo.owner}/${repo.repo}`,
+              issue_number: number,
+              issue_url: issue.html_url,
+              event_action: action,
+              received_at: receivedAt,
+              source_updated_at: updatedAt,
+              preserved_at: new Date().toISOString(),
+              author: {
+                login: issue.user?.login ?? null,
+                id: issue.user?.id ?? null,
+                type: issue.user?.type ?? null
+              },
+              title: issue.title,
+              body: issue.body ?? "",
+              state: issue.state,
+              labels: (issue.labels ?? []).map(label => typeof label === "string" ? label : label.name),
+              milestone: issue.milestone?.title ?? null,
+              assignees: (issue.assignees ?? []).map(user => user.login),
+              attachments_and_links: [...new Set((issue.body ?? "").match(/https?:\\/\\/[^\\s)]+/g) ?? [])],
+              provenance: {
+                github_event: action,
+                issue_node_id: issue.node_id,
+                issue_id: issue.id
+              }
+            };
+
+            const snapshotContent = JSON.stringify(snapshot, null, 2) + "\n";
+            const snapshotEncoded = Buffer.from(snapshotContent, "utf8").toString("base64");
+
+            // Snapshots are append-only. A retry of the same event is safe.
+            let snapshotExists = false;
+            try {
+              await github.rest.repos.getContent({ ...repo, path: snapshotPath });
+              snapshotExists = true;
+            } catch (error) {
+              if (error.status !== 404) throw error;
+            }
+
+            if (!snapshotExists) {
+              await github.rest.repos.createOrUpdateFileContents({
+                ...repo,
+                path: snapshotPath,
+                message: `Preserve Commons intake #${number} (${action})`,
+                content: snapshotEncoded
+              });
+            }
+
+            const current = [
+              `# ${issue.title}`,
+              "",
+              `- **Intake:** #${number}`,
+              `- **Original issue:** ${issue.html_url}`,
+              `- **Contributor:** @${issue.user?.login ?? "unknown"}`,
+              `- **Received:** ${receivedAt}`,
+              `- **Last updated:** ${updatedAt}`,
+              `- **Issue state:** ${issue.state}`,
+              `- **Preserved event:** ${action}`,
+              `- **Snapshot:** [${stamp}-${action}.json](snapshots/${stamp}-${action}.json)`,
+              "",
+              "## Original submitted material",
+              "",
+              issue.body ?? "_No body supplied._",
+              "",
+              "---",
+              "_This file is a convenience view of the latest issue state. Historical event snapshots are append-only. The GitHub issue remains the canonical source._",
+              ""
+            ].join("\n");
+            const currentEncoded = Buffer.from(current, "utf8").toString("base64");
+
+            let existing;
+            try {
+              existing = await github.rest.repos.getContent({ ...repo, path: currentPath });
+            } catch (error) {
+              if (error.status !== 404) throw error;
+            }
+
+            await github.rest.repos.createOrUpdateFileContents({
+              ...repo,
+              path: currentPath,
+              message: `Update preserved Commons intake #${number}`,
+              content: currentEncoded,
+              ...(existing?.data?.sha ? { sha: existing.data.sha } : {})
+            });
+
+            core.notice(`Preserved Commons intake #${number}; snapshot: ${snapshotPath}`);
