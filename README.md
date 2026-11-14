@@ -42,6 +42,7 @@ The fixed Observatory region coordinates are preserved. The current browser buil
 People can contribute raw material through the public [Commons intake issue form](https://github.com/rxe-alt788/Observatory/issues/new?template=commons-intake.yml). It accepts thoughts, questions, source links and public-safe excerpts without requiring contributors to organise them first.
 
 - Intake and processing contract: [COMMONS-INGESTION-SERVICE.md](COMMONS-INGESTION-SERVICE.md)
-- **Preservation:** GitHub Actions now snapshots matching intake issues on open, edit, reopen and close into `commons/intakes/issue-N/`, retaining append-only event history and a readable current record. First live run still needs verification.
-- **Current status:** automatic GitHub issue preservation is implemented in the repository. Database ingestion, attachment copying, indexing and AI enrichment are not deployed.
+- **Preservation:** GitHub Actions snapshots matching intake issues on open, edit, reopen and close into `commons/intakes/issue-N/`. Live preservation verified on intakes #1 and #2.
+- **AI analysis:** issue creation now triggers a source-linked analysis draft through the OpenAI Responses API, provided the repository Actions secret `OPENAI_API_KEY` is configured. Optional model selection uses the repository variable `OPENAI_MODEL`. This new AI step still needs a fresh-issue test.
+- **Current status:** preservation is live and tested; the automated AI processor is committed but awaits API-secret configuration and end-to-end verification. Database ingestion, attachment copying, semantic indexing and cross-intake relationship discovery are not deployed.
 - **Privacy:** GitHub issues in this repository are public. Do not submit confidential or personal material.
